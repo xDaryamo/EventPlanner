@@ -4,7 +4,7 @@ from pymongo import MongoClient
 class Expense:
     def __init__(self):
         self.db = MongoClient()['event_planner']
-        self.expenses_collection = self.db['expenses_collection']
+        self.expenses_collection = self.db['expenses']
 
     def create_expense(self, expenses_data):
         result = self.expenses_collection.insert_one(expenses_data)

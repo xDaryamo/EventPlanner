@@ -4,7 +4,7 @@ from pymongo import MongoClient
 class Activity:
     def __init__(self):
         self.db = MongoClient()['event_planner']
-        self.activities_collection = self.db['activities_collection']
+        self.activities_collection = self.db['activities']
 
     def create_activity(self, activity_data):
         result = self.activities_collection.insert_one(activity_data)

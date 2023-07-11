@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session
 from pymongo import MongoClient
 from models.users import User
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="template")
 app.secret_key = 'key'
 client = MongoClient('mongodb://localhost:27017/')
 
@@ -26,8 +26,8 @@ def login():
         password = request.form['password']
 
         # Esegui l'autenticazione dell'utente
-        is_authenticate, user_id = user_model.authenticate_user(email, password)
-        if is_authenticate:
+        user_id = user_model.authenticate_user(email, password)
+        if user_id:
             # Utente autenticato, salvare le informazioni nella sessione
             session['user'] = user_id
             # Reindirizza alla pagina iniziale

@@ -1,11 +1,12 @@
 from bson import ObjectId
 from pymongo import MongoClient
-from bcrypt import hashpw, gensalt
+from bcrypt import hashpw, gensalt, checkpw
+
 
 class User:
     def __init__(self):
         self.db = MongoClient()['event_planner']
-        self.users_collection = self.db['users_collection']
+        self.users_collection = self.db['users']
 
     def create_user(self, user_data):
         result = self.users_collection.insert_one(user_data)
@@ -25,9 +26,9 @@ class User:
         if user:
             # Verifica la password hash
             stored_password_hash = user['password']
-            if hashpw(psw.encode('utf-8'), stored_password_hash) == stored_password_hash:
-                return True, user['_id']
-        return False, None
+            if checkpw(psw.encode('utf-8'), stored_password_hash):
+                return user['_id']
+        return None
 
     def update_user(self, user_id, updated_data):
         result = self.users_collection.update_one({'_id': user_id}, {'$set': updated_data})

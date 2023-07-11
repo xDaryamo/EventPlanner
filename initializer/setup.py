@@ -1,196 +1,175 @@
-import pymongo
-from bson import ObjectId
+import bcrypt
+from pymongo import MongoClient
+from bson.objectid import ObjectId
+from random import choice, choices
+from datetime import datetime, timedelta
 from faker import Faker
 
-# Connessione al database MongoDB
-client = pymongo.MongoClient("mongodb://localhost:27017/")
-database = client["eventplanner"]
+# Connessione al database
+client = MongoClient()
+db = client['event_planner']
 
-# Creazione delle collezioni
-events_collection = database["events"]
-budgets_collection = database["budgets"]
-expenses_collection = database["expenses"]
-schedule_collection = database["schedule"]
-activities_collection = database["activities"]
-users_collection = database["users"]
+# Istanza di Faker per generare dati casuali
+fake = Faker()
 
-# Creazione di un evento
-def create_event(nome, categoria, tags, data_inizio, data_fine, organizzatore_id, luogo, descrizione):
-    event = {
-        "_id": ObjectId(),
+# Funzione per generare un ID casuale
+def genera_id():
+    return str(ObjectId())
+
+# Generazione di dati casuali per le categorie degli eventi
+categorie = ["Mostra", "Concerto", "Festa", "Cerimonia", "Conferenza"]
+
+# Generazione di dati casuali per i tag degli eventi
+tags = {
+    "Mostra": ["arte", "pittura", "scultura"],
+    "Concerto": ["musica", "live", "rock", "pop"],
+    "Festa": ["feste", "divertimento", "balli"],
+    "Cerimonia": ["matrimonio", "anniversario", "celebrazione"],
+    "Conferenza": ["conferenze", "discorsi", "presentazioni"]
+}
+
+# Generazione di dati casuali per gli orari di inizio e fine delle attività
+orari_inizio = ["09:00", "10:00", "11:00", "12:00", "13:00"]
+orari_fine = ["15:00", "16:00", "17:00", "18:00", "19:00"]
+
+# Generazione di dati casuali per le descrizioni delle spese
+descrizioni_spese = ["Catering", "Noleggio attrezzature", "Servizi audiovisivi", "Decorazioni"]
+
+# Funzione per generare un evento casuale
+def genera_evento():
+    nome = fake.catch_phrase()
+    categoria = choice(categorie)
+    num_tags = choice(range(1, 4))  # Numero casuale di tag da selezionare
+    tag = choices(tags[categoria], k=num_tags)  # Seleziona casualmente i tag dalla lista corrispondente alla categoria
+    data_inizio = datetime.now() + timedelta(days=30)
+    data_fine = data_inizio + timedelta(days=2)
+    id_organizzatore = genera_id()
+    luogo = fake.address()
+    informazioni_aggiuntive = fake.paragraph()
+
+    evento = {
+        "_id": genera_id(),
         "nome": nome,
         "categoria": categoria,
-        "tags": tags,
-        "dataInizio": data_inizio,
-        "dataFine": data_fine,
-        "organizzatoreId": organizzatore_id,
+        "tags": tag,
+        "data_inizio": data_inizio,
+        "data_fine": data_fine,
+        "idOrganizzatore": id_organizzatore,
         "budgetId": None,
         "scheduleId": None,
         "luogo": luogo,
-        "informazioniAggiuntive": descrizione
-
+        "informazioni_aggiuntive": informazioni_aggiuntive
     }
-    events_collection.insert_one(event)
-    return event["_id"]
 
-# Creazione di un budget per un evento
-def create_budget(event_id, totale):
+    return evento
+
+# Funzione per generare un budget casuale
+def genera_budget(id_evento):
+    id_budget = genera_id()
+    totale_spendere = 1000
+    id_spese = []
+
+    for _ in range(3):
+        costo = choice([100, 200, 300, 400])
+        descrizione = choice(descrizioni_spese)
+        spesa = {
+            "_id": genera_id(),
+            "id_budget": id_budget,
+            "costo": costo,
+            "descrizione": descrizione
+        }
+        db.expenses.insert_one(spesa)
+        id_spese.append(spesa["_id"])
+
     budget = {
-        "_id": ObjectId(),
-        "eventoId": event_id,
-        "totale": totale,
-        "spese": None
-    }
-    budgets_collection.insert_one(budget)
-    return budget["_id"]
-
-# Creazione di una spesa per un budget di un evento
-def create_expense(budgets_id, quantita, descrizione):
-    expense = {
-        "_id": ObjectId(),
-        "budgetsId": budgets_id,
-        "quantita": quantita,
-        "descrizione": descrizione
-    }
-    expenses_collection.insert_one(budget)
-    return expense["_id"]
-
-# Creazione di uno schedule per un evento
-def create_schedule(event_id):
-    schedule = {
-        "_id": ObjectId(),
-        "eventoId": event_id,
-        "attivita": None
-    }
-    schedule_collection.insert_one(activity)
-    return schedule["_id"]
-
-# Creazione di un'attività per un evento
-def create_activity(schedule_id, nome_attivita, orario_inizio, orario_fine):
-    activity = {
-        "_id": ObjectId(),
-        "scheduleId": schedule_id,
-        "nomeAttivita": nome_attivita,
-        "orarioInizio": orario_inizio,
-        "orarioFine": orario_fine
-    }
-    activities_collection.insert_one(activity)
-    return activity["_id"]
-
-# Creazione di un utente organizzatore
-def create_user(username, password, email):
-
-    emails = users_collection.find({'email': email})
-
-    if email in emails:
-        return None
-
-    user = {
-        "_id": ObjectId(),
-        "username": username,
-        "password": password,
-        "email": email
-    }
-    users_collection.insert_one(user)
-    return user["_id"]
-
-# Generazione di dati casuali utilizzando il modulo faker
-fake = Faker()
-
-# Creazione di utenti organizzatori
-def create_fake_users(num_users):
-    user_ids = []
-
-    domains = ["gmail.com", "yahoo.com", "hotmail.com", "example.com"]  # Elenca qui i domini che desideri utilizzare
-    random_domain = fake.random.choice(domains)
-    user_name = fake.user_name()
-
-    for _ in range(num_users):
-        user_id = create_user(
-            user_name,
-            fake.password(),
-            user_name + random_domain
-        )
-        user_ids.append(user_id)
-
-    return user_ids
-
-# Creazione di eventi
-def create_fake_events(num_events, num_activities):
-    event_ids = []
-    user_ids = list(users_collection.find().distinct("_id"))
-
-    categories = ["Mostra", "Concerto", "Festa", "Cerimonia", "Conferenza"]
-
-    tags = {
-        "Mostra": ["Arte contemporanea", "Pittura", "Scultura", "Fotografia", "Installazioni", "Esposizione",
-                   "Vernissage"],
-        "Concerto": ["Rock", "Pop", "Jazz", "Classica", "Elettronica", "Hip-hop", "Indie", "Festival"],
-        "Festa": ["Compleanno", "Laurea", "Matrimonio", "Anniversario", "Baby shower", "Addio al celibato/nubilato",
-                  "Festa a tema"],
-        "Cerimonia": ["Premiazione", "Inaugurazione", "Consegna di riconoscimenti", "Cerimonia religiosa",
-                      "Cerimonia di apertura/chiusura", "Cerimonia di premiazione"],
-        "Conferenza": ["Business", "Tecnologia", "Salute", "Educazione", "Scienza", "Ambiente", "Marketing",
-                       "Leadership"]
+        "_id": id_budget,
+        "id_evento": id_evento,
+        "totale_spendere": totale_spendere,
+        "spese": id_spese
     }
 
-    for _ in range(num_events):
-        organizzatore_id = fake.random.choice(user_ids)
+    return budget
 
-        categoria = fake.random_element(categories)
-        event_id = create_event(
-            fake.company(),
-            categoria,
-            fake.random.sample(tags[categoria], fake.random.randint(1, len(tags[categoria]))),
-            fake.future_datetime(),
-            fake.future_datetime(),
-            organizzatore_id,
-            fake.address(),
-            fake.text()
-        )
-        event_ids.append(event_id)
+# Funzione per generare un'attività casuale
+def genera_attivita(id_schedule):
+    nome = fake.catch_phrase()
+    orario_inizio = choice(orari_inizio)
+    orario_fine = choice(orari_fine)
 
-        budget_id = create_budget(
-            event_id,
-            fake.random_int(1000, 10000),
-            [{"nome": fake.word(), "importo": fake.random_int(100, 1000)} for _ in range(fake.random_int(1, 5))]
-        )
+    attivita = {
+        "_id": genera_id(),
+        "id_schedule": id_schedule,
+        "nome": nome,
+        "orario_inizio": orario_inizio,
+        "orario_fine": orario_fine
+    }
 
-        for _ in range(num_activities):
-            create_activity(
-                event_id,
-                fake.job(),
-                fake.future_datetime(),
-                fake.future_datetime()
-            )
+    return attivita
 
-    return event_ids
+# Funzione per generare un utente casuale
+def genera_utente():
+    email = fake.email()
+    password = fake.password()
+    username = fake.user_name()
 
+    # Converto la password in un array di bytes
+    bytes = password.encode('utf-8')
 
+    # genero il salt
+    salt = bcrypt.gensalt()
 
-# Esempio di creazione di 10 utenti organizzatori
-user_ids = create_fake_users(10)
+    # hashing
+    hash = bcrypt.hashpw(bytes, salt)
+    utente = {
+        "_id": genera_id(),
+        "email": email,
+        "password": hash,
+        "username": username
+    }
 
-# Esempio di creazione di 20 eventi con 5 attività per ogni evento
-event_ids = create_fake_events(20, 5)
+    return utente
 
-# Recupero degli eventi
-events = events_collection.find()
-for event in events:
-    print(event)
+# Popolamento del database con dati casuali
+def popola_database():
+    num_utenti = 3
+    num_eventi = 10
+    num_attivita_per_schedule = 3
 
-# Recupero del budget per un evento specifico
-budget = budgets_collection.find_one({"eventoId": event_ids[0]})
-print(budget)
+    # Genera utenti
+    utenti = [genera_utente() for _ in range(num_utenti)]
+    db.users.insert_many(utenti)
 
-# Recupero delle attività per un evento specifico
-activities = program_collection.find({"eventoId": event_ids[0]})
-for activity in activities:
-    print(activity)
+    # Genera eventi
+    eventi = []
+    for _ in range(num_eventi):
+        evento = genera_evento()
+        eventi.append(evento)
+        db.events.insert_one(evento)
 
-# Recupero dell'utente organizzatore per un evento specifico
-organizzatore = users_collection.find_one({"_id": user_ids[0]})
-print(organizzatore)
+    # Genera budget, spese e schedule per ogni evento
+    for evento in eventi:
+        id_evento = evento["_id"]
 
-# Chiusura della connessione al database
-client.close()
+        # Genera budget
+        budget = genera_budget(id_evento)
+        evento["budgetId"] = budget["_id"]
+        db.budget.insert_one(budget)
+        db.events.update_one({"_id": id_evento}, {"$set": {"budgetId": budget["_id"]}})
+
+        # Genera schedule e attività
+        schedule = {
+            "_id": genera_id(),
+            "id_evento": id_evento,
+            "activities": []
+        }
+        for _ in range(num_attivita_per_schedule):
+            attivita = genera_attivita(schedule["_id"])
+            schedule["activities"].append(attivita["_id"])
+            db.activities.insert_one(attivita)
+        db.schedule.insert_one(schedule)
+        db.events.update_one({"_id": id_evento}, {"$set": {"scheduleId": schedule["_id"]}})
+
+    print("Database popolato con successo!")
+
+# Esegui la funzione per popolare il database
+popola_database()

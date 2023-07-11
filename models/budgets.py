@@ -4,7 +4,7 @@ from pymongo import MongoClient
 class Budget:
     def __init__(self):
         self.db = MongoClient()['event_planner']
-        self.budgets_collection = self.db['budgets_collection']
+        self.budgets_collection = self.db['budget']
 
     def create_budget(self, budget_data):
         result = self.budgets_collection.insert_one(budget_data)
@@ -24,3 +24,17 @@ class Budget:
     def delete_budget(self, budget_id):
         result = self.budgets_collection.delete_one({'_id': budget_id})
         return result.deleted_count > 0
+
+    def add_expense(self, budget_id, expense_id):
+        result = self.budgets_collection.update_one(
+            {'_id': ObjectId(budget_id)},
+            {'$addToSet': {'activities': ObjectId(expense_id)}}
+        )
+        return result.modified_count > 0
+
+    def remove_expense(self, budget_id, expense_id):
+        result = self.schedule_collection.update_one(
+            {'_id': ObjectId(budget_id)},
+            {'$pull': {'activities': ObjectId(expense_id)}}
+        )
+        return result.modified_count > 0
