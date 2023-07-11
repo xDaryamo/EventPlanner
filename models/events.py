@@ -21,6 +21,9 @@ class Event:
         events = list(self.events_collection.find())
         return events
 
+    def get_all_events_by_user(self, user_id):
+        events = self.events_collection.find({'userId': user_id})
+        return events
     def update_event(self, event_id, updated_data):
         result = self.events_collection.update_one({'_id': event_id}, {'$set': updated_data})
         return result.modified_count > 0

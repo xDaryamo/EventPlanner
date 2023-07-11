@@ -1,3 +1,5 @@
+import random
+
 import bcrypt
 from pymongo import MongoClient
 from bson.objectid import ObjectId
@@ -36,14 +38,14 @@ orari_fine = ["15:00", "16:00", "17:00", "18:00", "19:00"]
 descrizioni_spese = ["Catering", "Noleggio attrezzature", "Servizi audiovisivi", "Decorazioni"]
 
 # Funzione per generare un evento casuale
-def genera_evento():
+def genera_evento(user_id):
     nome = fake.catch_phrase()
     categoria = choice(categorie)
     num_tags = choice(range(1, 4))  # Numero casuale di tag da selezionare
     tag = choices(tags[categoria], k=num_tags)  # Seleziona casualmente i tag dalla lista corrispondente alla categoria
     data_inizio = datetime.now() + timedelta(days=30)
     data_fine = data_inizio + timedelta(days=2)
-    id_organizzatore = genera_id()
+
     luogo = fake.address()
     informazioni_aggiuntive = fake.paragraph()
 
@@ -54,7 +56,7 @@ def genera_evento():
         "tags": tag,
         "data_inizio": data_inizio,
         "data_fine": data_fine,
-        "idOrganizzatore": id_organizzatore,
+        "userId": user_id,
         "budgetId": None,
         "scheduleId": None,
         "luogo": luogo,
@@ -109,7 +111,7 @@ def genera_attivita(id_schedule):
 # Funzione per generare un utente casuale
 def genera_utente():
     email = fake.email()
-    password = fake.password()
+    password = "password" #fake.password()
     username = fake.user_name()
 
     # Converto la password in un array di bytes
@@ -137,12 +139,13 @@ def popola_database():
 
     # Genera utenti
     utenti = [genera_utente() for _ in range(num_utenti)]
+    user_ids = [utente["_id"] for utente in utenti]
     db.users.insert_many(utenti)
 
     # Genera eventi
     eventi = []
     for _ in range(num_eventi):
-        evento = genera_evento()
+        evento = genera_evento(random.choice(user_ids))
         eventi.append(evento)
         db.events.insert_one(evento)
 

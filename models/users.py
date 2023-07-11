@@ -9,6 +9,7 @@ class User:
         self.users_collection = self.db['users']
 
     def create_user(self, user_data):
+        user_data['_id'] = str(user_data['_id'])
         result = self.users_collection.insert_one(user_data)
         if result.inserted_id:
             return str(result.inserted_id)  # Restituisce l'ID dell'utente creato
@@ -17,13 +18,21 @@ class User:
 
     def get_user(self, user_id):
         user = self.users_collection.find_one({'_id': ObjectId(user_id)})
+        if user:
+            user['_id'] = str(user['_id'])
         return user
+    def get_user_by_email(self, email):
+        user = self.users_collection.find_one({'email': email})
+        if user:
+            user['_id'] = str(user['_id'])
+        return user
+
 
     def authenticate_user(self, email, psw):
         # Trova l'utente nel database
         user = self.users_collection.find_one({'email': email})
-
         if user:
+            user['_id'] = str(user['_id'])
             # Verifica la password hash
             stored_password_hash = user['password']
             if checkpw(psw.encode('utf-8'), stored_password_hash):
