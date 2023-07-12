@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    {% include './fragments/header.html' %}
+    <form method="POST" action="{{ url_for('create_event') }}">
+      
+      <div>
+        <label for="nome">Nome evento:</label>
+        <input type="text" id="nome" name="nome" >
+      </div>
+
+       <div>
+        <label for="categoria">Categoria evento:</label>
+        <input type="text" id="categoria" name="categoria">
+      </div>
+
+      <div>
+        <label for="tags">Tags:</label>
+        <input type="text" id="tags" name="tags">
+      </div>
+
+      <div>
+        <label for="data_inizio">Data Inzio:</label>
+        <input type="text" id="data_inizio" name="data_inizio">
+      </div>
+
+      <div>
+        <label>Budget:</label>
+        <div>
+          <label for="totale">Tags:</label>
+          <input type="text" id="totale" name="tags">
+        </div>
+
+      </div>
+
+      <div>
+        <label>Schedule:</label>
+
+      </div>
+
+      <div>
+        <label for="data_fine">Data Fine:</label>
+        <input type="text" id="data_fine" name="data_inizio">
+      </div>
+
+      <div>
+        <label for="luogo">Luogo:</label>
+        <input type="text" id="luogo" name="luogo">
+      </div>
+
+      <div>
+        <label for="informazioni_aggiuntive">Info Aggiuntive:</label>
+        <input type="text" id="informazioni_aggiuntive" name="informazioni_aggiuntive">
+      </div>
+    </form>
+    {% include './fragments/footer.html' %}
+</body>
+</html>

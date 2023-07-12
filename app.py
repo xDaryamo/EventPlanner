@@ -4,8 +4,6 @@ from bcrypt import hashpw, gensalt
 from bson import ObjectId
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from pymongo import MongoClient
-
-from form_logic.form import EventForm, BudgetForm, ScheduleForm, ActivityForm, ExpenseForm
 from models.users import User
 from models.events import Event
 from models.budgets import Budget
@@ -169,14 +167,14 @@ def create_event():
             attivita = []
 
             activity_data = {
-                "_id": str(ObjectId()),
-                "id_schedule": a_form.id_schedule.data,
-                "nome": a_form.nome.data,
-                "orario_inizio": a_form.orario_inizio.data,
-                "orario_fine": a_form.orario_fine.data
+                "_id": id_attivita,
+                "id_schedule": id_schedule,
+                "nome": request.form['nome'],
+                "orario_inizio": request.form['orario_inizio'],
+                "orario_fine": request.form['orario_fine']
             }
             activity_model.create_activity(activity_data)
-            attivita.append(activity_data.get("_id"))
+            attivita.append(id_attivita)
 
             schedule_data = {
                 "_id": id_schedule,
