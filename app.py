@@ -141,23 +141,23 @@ def create_event():
             e_form = ExpenseForm(expense_form)
             e_form.populate_budget_id(id_budget)
 
-            spesa = {
+            expense_data = {
                 "_id" : str(ObjectId()),
                 "id_budget": e_form.id_budget.data,
                 "costo" : e_form.costo.data,
                 "descrizione": e_form.descrizione.data
             }
-            expense_model.create_expense(spesa)
-            spese.append(spesa)
+            expense_model.create_expense(expense_data)
+            spese.append(expense_data.get("_id"))
 
-        budget = {
+        budget_data = {
             "_id" : id_budget,
             "id_evento" : b_form.id_evento.data,
             "totale_spendere" : b_form.totale_spendere.data,
             "spese" : spese
         }
 
-        budget_model.create_budget(budget)
+        budget_model.create_budget(budget_data)
 
         # Estrazione dati schedule e attività
         s_form = ScheduleForm(form.schedule)
@@ -168,25 +168,25 @@ def create_event():
         for activity_form in s_form.attivita:
             a_form = ActivityForm(activity_form)
             a_form.populate_schedule_id(id_schedule)
-            act = {
+            activity_data = {
                 "_id": str(ObjectId()),
                 "id_schedule": a_form.id_schedule.data,
                 "nome": a_form.nome.data,
                 "orario_inizio": a_form.orario_inizio.data,
                 "orario_fine": a_form.orario_fine.data
             }
-            activity_model.create_activity(act)
-            attivita.append(act)
+            activity_model.create_activity(activity_data)
+            attivita.append(activity_data.get("_id"))
 
-        schedule = {
+        schedule_data = {
             "_id" :  id_schedule,
             "id_evento" : s_form.id_evento.data,
             "activities" : attivita
         }
 
-        schedule_model.create_schedule(schedule)
+        schedule_model.create_schedule(schedule_data)
 
-        evento = {
+        event_data = {
             "_id": id_evento,
             "nome": form.nome.data,
             "categoria": form.categoria.data,
@@ -200,7 +200,7 @@ def create_event():
             "informazioni_aggiuntive": form.info_add.data
         }
 
-        event_model.create_event(evento)
+        event_model.create_event(event_data)
 
         return redirect(url_for('evento_dettaglio'))
     return render_template('index.html', form=form)#todo
