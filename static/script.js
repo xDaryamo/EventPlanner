@@ -142,4 +142,20 @@ $(document).ready(function() {
         getUserMonthEvents(anno, mese);
     });
 
+    $(document).on('click', 'li:not(.inactive):not(.day-of-week)', function() {
+        var day = $(this).data('originalText');
+        var month = convertMonthToNumber($('.current-date').text().split(" ")[0]);
+        var year = $('.current-date').text().split(" ")[1];
+
+        if($(this).find('i').length !== 0){
+            var url = '/update-event?day=' + day + '&month=' + month + '&year=' + year;
+        }
+        else {
+            var url = createEventURL +'?day=' + encodeURIComponent(day) + '&month=' + encodeURIComponent(month) + '&year=' + encodeURIComponent(year);
+        }
+
+
+        window.location.href = url;
+  });
+
 });

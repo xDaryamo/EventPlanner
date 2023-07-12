@@ -121,53 +121,53 @@ def register():
     else:
         return render_template('register.html')
 
-@app.route('/event/create', methods=['GET', 'POST'])
+@app.route('/insert-event', methods=['GET', 'POST'])
 def create_event():
-    # Estrazione dati evento
-    form = EventForm(request.form)
-    form.populate_user_id(session['user'])
+    if request.method == 'GET':
+        start_day = request.args.get('day')
+        start_month = request.args.get('month')
+        start_year = request.args.get('year')
 
-    if request.method == 'POST' and form.validate():
+        print(start_day)
+        print(start_month)
+        print(start_year)
 
-        id_evento = str(ObjectId())
+        return render_template('create-event.html', giorno=start_day, mese=start_month, anno=start_year)
 
-        #Estrazione dati budget e spese
-        b_form = BudgetForm(form.budget)
-        b_form.populate_evento_id(id_evento)
-        id_budget = str(ObjectId())
-        spese = []
 
-        for expense_form in b_form.spese:
-            e_form = ExpenseForm(expense_form)
-            e_form.populate_budget_id(id_budget)
+    if request.method == 'POST':
 
+            id_evento = str(ObjectId())
+            id_budget = str(ObjectId())
+            id_schedule = str(ObjectId())
+
+            # Budget e Spese
+            spese = []
+
+            id_spesa = str(ObjectId())
             expense_data = {
-                "_id" : str(ObjectId()),
-                "id_budget": e_form.id_budget.data,
-                "costo" : e_form.costo.data,
-                "descrizione": e_form.descrizione.data
+                    "_id": id_spesa,
+                    "id_budget": id_budget,
+                    "costo": request.form['costo'],
+                    "descrizione": request.form['descrizione']
             }
             expense_model.create_expense(expense_data)
-            spese.append(expense_data.get("_id"))
+            spese.append(id_spesa)
 
-        budget_data = {
-            "_id" : id_budget,
-            "id_evento" : b_form.id_evento.data,
-            "totale_spendere" : b_form.totale_spendere.data,
-            "spese" : spese
-        }
+            budget_data = {
+                "_id": id_budget,
+                "id_evento": id_evento,
+                "totale_spendere": request.form['totale'],
+                "spese": spese
+            }
 
-        budget_model.create_budget(budget_data)
+            budget_model.create_budget(budget_data)
 
-        # Estrazione dati schedule e attività
-        s_form = ScheduleForm(form.schedule)
-        s_form.populate_evento_id(id_evento)
-        id_schedule = str(ObjectId())
-        attivita = []
+            # Schedule e Attività
+            id_attivita = str(ObjectId())
 
-        for activity_form in s_form.attivita:
-            a_form = ActivityForm(activity_form)
-            a_form.populate_schedule_id(id_schedule)
+            attivita = []
+
             activity_data = {
                 "_id": str(ObjectId()),
                 "id_schedule": a_form.id_schedule.data,
@@ -178,32 +178,37 @@ def create_event():
             activity_model.create_activity(activity_data)
             attivita.append(activity_data.get("_id"))
 
-        schedule_data = {
-            "_id" :  id_schedule,
-            "id_evento" : s_form.id_evento.data,
-            "activities" : attivita
-        }
+            schedule_data = {
+                "_id": id_schedule,
+                "id_evento": id_evento,
+                "activities": attivita
+            }
 
-        schedule_model.create_schedule(schedule_data)
+            schedule_model.create_schedule(schedule_data)
 
-        event_data = {
-            "_id": id_evento,
-            "nome": form.nome.data,
-            "categoria": form.categoria.data,
-            "tags": form.tags.data,
-            "data_inizio": form.data_inizio.data,
-            "data_fine": form.data_fine.data,
-            "userId": form.organizzatore.data,
-            "budgetId": id_budget,
-            "scheduleId": id_schedule,
-            "luogo": form.luogo.data,
-            "informazioni_aggiuntive": form.info_add.data
-        }
+            #Evento
+            event_data = {
+                "_id": id_evento,
+                "nome": request.form['nome'],
+                "categoria": request.form['categoria'],
+                "tags": request.form['tags'],
+                "data_inizio": request.form['data_inizio'],
+                "data_fine": request.form['data_fine'],
+                "userId": session['organizzatore'],
+                "budgetId": id_budget,
+                "scheduleId": id_schedule,
+                "luogo": request.form['luogo'],
+                "informazioni_aggiuntive": request.form['informazioni_aggiuntive']
+            }
 
-        event_model.create_event(event_data)
+            event_model.create_event(event_data)
 
-        return redirect(url_for('evento_dettaglio'))
-    return render_template('index.html', form=form)#todo
+            return render_template('index.html')
+
+
+
+@app.route('/update-event', methods=['GET'])
+
 
 @app.route("/events", methods=['GET'])
 def get_user_month_events():
