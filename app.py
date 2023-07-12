@@ -209,11 +209,11 @@ def create_event():
             'tags': tags_list,
             'data_inizio': data_inizio,
             'data_fine': data_fine,
-            'organizzatore': None,
+            'userId': session['user'],
             'luogo': luogo,
             'informazioni_aggiuntive': informazioni_aggiuntive,
-            'budget': budget_item,
-            'schedule': schedule_item
+            'budgetId': id_budget,
+            'scheduleId': id_schedule
         }
 
         # Salvataggio del documento evento nel database
