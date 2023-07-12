@@ -121,6 +121,10 @@ def register():
 
 @app.route('/insert-event', methods=['GET', 'POST'])
 def create_event():
+
+    global id_schedule
+    global id_budget
+
     if request.method == 'GET':
         start_day = request.args.get('day')
         start_month = request.args.get('month')
@@ -132,76 +136,90 @@ def create_event():
 
         return render_template('create-event.html', giorno=start_day, mese=start_month, anno=start_year)
 
-
     if request.method == 'POST':
+        id_evento = str(ObjectId())
+        nome_evento = request.form['nome_evento']
+        categoria = request.form['categoria']
 
-            id_evento = str(ObjectId())
-            id_budget = str(ObjectId())
-            id_schedule = str(ObjectId())
+        tags = request.form['tags']
+        tags_list = [tag.strip() for tag in tags.split(',')]
 
-            # Budget e Spese
+        #Aggiungere i controlli sulla data
+        data_inizio = request.form['data_inizio']
+        data_fine = request.form['data_fine']
+
+        luogo = request.form['luogo']
+        informazioni_aggiuntive = request.form['informazioni_aggiuntive']
+
+        include_budget = request.form.get('include_budget')
+        id_budget = str(ObjectId())
+
+        if include_budget:
+            totale_spesa = request.form['totale_spesa']
+            spese = []
+            for i in range(1, len(request.form.getlist('costo')) + 1):
+                id_spesa = str(ObjectId())
+                costo = request.form['costo{}'.format(i)]
+                descrizione = request.form['descrizione{}'.format(i)]
+                spesa = { '_id': id_spesa, 'id_budget': id_budget,'costo': costo, 'descrizione': descrizione}
+                expense_model.create_expense(spesa)
+                spese.append(id_spesa)
+        else:
+            totale_spesa = None
             spese = []
 
-            id_spesa = str(ObjectId())
-            expense_data = {
-                    "_id": id_spesa,
-                    "id_budget": id_budget,
-                    "costo": request.form['costo'],
-                    "descrizione": request.form['descrizione']
-            }
-            expense_model.create_expense(expense_data)
-            spese.append(id_spesa)
+        include_schedule = request.form.get('include_schedule')
+        id_schedule = str(ObjectId())
 
-            budget_data = {
-                "_id": id_budget,
-                "id_evento": id_evento,
-                "totale_spendere": request.form['totale'],
-                "spese": spese
-            }
-
-            budget_model.create_budget(budget_data)
-
-            # Schedule e Attività
-            id_attivita = str(ObjectId())
-
+        if include_schedule:
+            attivita = []
+            for i in range(1, len(request.form.getlist('nome')) + 1):
+                id_attivita = str(ObjectId())
+                nome_act = request.form['nome{}'.format(i)]
+                orario_inizio = request.form['orario_inizio{}'.format(i)]
+                orario_fine = request.form['orario_fine{}'.format(i)]
+                attivita_item = {'_id': id_attivita,'id_schedule': id_schedule ,'nome': nome_act,
+                                 'orario_inizio': orario_inizio, 'orario_fine': orario_fine}
+                activity_model.create_activity(attivita_item)
+                attivita.append(id_attivita)
+        else:
             attivita = []
 
-            activity_data = {
-                "_id": id_attivita,
-                "id_schedule": id_schedule,
-                "nome": request.form['nome'],
-                "orario_inizio": request.form['orario_inizio'],
-                "orario_fine": request.form['orario_fine']
-            }
-            activity_model.create_activity(activity_data)
-            attivita.append(id_attivita)
+        budget_item = {
+                "_id": id_budget,
+                "id_evento": id_evento,
+                'totale_spesa': totale_spesa,
+                'spese': spese
+        }
 
-            schedule_data = {
+        budget_model.create_budget(budget_item)
+
+        schedule_item = {
                 "_id": id_schedule,
                 "id_evento": id_evento,
-                "activities": attivita
-            }
+                'attivita': attivita
+        }
 
-            schedule_model.create_schedule(schedule_data)
+        schedule_model.create_schedule(schedule_item)
 
-            #Evento
-            event_data = {
-                "_id": id_evento,
-                "nome": request.form['nome'],
-                "categoria": request.form['categoria'],
-                "tags": request.form['tags'],
-                "data_inizio": request.form['data_inizio'],
-                "data_fine": request.form['data_fine'],
-                "userId": session['organizzatore'],
-                "budgetId": id_budget,
-                "scheduleId": id_schedule,
-                "luogo": request.form['luogo'],
-                "informazioni_aggiuntive": request.form['informazioni_aggiuntive']
-            }
+        # Creazione del documento evento
+        evento = {
+            'nome': nome_evento,
+            'categoria': categoria,
+            'tags': tags_list,
+            'data_inizio': data_inizio,
+            'data_fine': data_fine,
+            'organizzatore': None,
+            'luogo': luogo,
+            'informazioni_aggiuntive': informazioni_aggiuntive,
+            'budget': budget_item,
+            'schedule': schedule_item
+        }
 
-            event_model.create_event(event_data)
+        # Salvataggio del documento evento nel database
+        event_model.create_event(evento)
 
-            return render_template('index.html')
+    return render_template('index.html')
 
 
 

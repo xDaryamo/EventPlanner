@@ -12,58 +12,157 @@
 </head>
 
 <body>
-    {% include './fragments/header.html' %}
-    <form method="POST" action="{{ url_for('create_event') }}">
-      
-      <div>
-        <label for="nome">Nome evento:</label>
-        <input type="text" id="nome" name="nome" >
+  <form method="POST" action="{{ url_for('create_event') }}">
+    <label for="nome_evento">Nome:</label>
+    <input type="text" id="nome_evento" name="nome" required><br>
+
+    <label for="categoria">Categoria:</label>
+    <input type="text" id="categoria" name="categoria" required><br>
+
+    <label for="tags">Tags:</label>
+    <input type="text" id="tags" name="tags" required><br>
+
+    <label for="data_inizio">Data inizio:</label>
+    <input type="date" id="data_inizio" name="data_inizio" required><br>
+
+    <label for="data_fine">Data fine:</label>
+    <input type="date" id="data_fine" name="data_fine" required><br>
+
+    <label for="luogo">Luogo:</label>
+    <input type="text" id="luogo" name="luogo" required><br>
+
+    <label for="informazioni_aggiuntive">Informazioni aggiuntive:</label><br>
+    <textarea id="informazioni_aggiuntive" name="informazioni_aggiuntive" rows="4" cols="50"></textarea><br>
+
+    <fieldset>
+      <legend>Budget</legend>
+      <input type="checkbox" id="include_budget" name="include_budget" onchange="toggleBudgetFields()"><label for="include_budget">Includi budget</label><br>
+
+      <div id="budget_fields" style="display:none;">
+        <label for="totale_spesa">Totale spesa:</label>
+        <input type="text" id="totale_spesa" name="totale_spesa"><br>
+
+        <label for="spese">Spese:</label>
+        <ul id="spese">
+          <li>
+            <label for="costo1">Costo:</label>
+            <input type="text" id="costo1" name="costo1">
+            <label for="descrizione1">Descrizione:</label>
+            <input type="text" id="descrizione1" name="descrizione1">
+          </li>
+        </ul>
+
+        <button type="button" onclick="addSpesaField()">Aggiungi spesa</button>
       </div>
+    </fieldset>
 
-       <div>
-        <label for="categoria">Categoria evento:</label>
-        <input type="text" id="categoria" name="categoria">
+    <fieldset>
+      <legend>Schedule</legend>
+      <input type="checkbox" id="include_schedule" name="include_schedule" onchange="toggleScheduleFields()"><label for="include_schedule">Includi schedule</label><br>
+
+      <div id="schedule_fields" style="display:none;">
+        <ul id="attivita">
+          <li>
+            <label for="nome1">Nome:</label>
+            <input type="text" id="nome1" name="nome1">
+            <label for="orario_inizio1">Orario inizio:</label>
+            <input type="text" id="orario_inizio1" name="orario_inizio1">
+            <label for="orario_fine1">Orario fine:</label>
+            <input type="text" id="orario_fine1" name="orario_fine1">
+          </li>
+        </ul>
+
+        <button type="button" onclick="addAttivitaField()">Aggiungi attività</button>
       </div>
+    </fieldset>
 
-      <div>
-        <label for="tags">Tags:</label>
-        <input type="text" id="tags" name="tags">
-      </div>
+    <input type="submit" value="Crea Evento">
+  </form>
 
-      <div>
-        <label for="data_inizio">Data Inzio:</label>
-        <input type="text" id="data_inizio" name="data_inizio">
-      </div>
-
-      <div>
-        <label>Budget:</label>
-        <div>
-          <label for="totale">Tags:</label>
-          <input type="text" id="totale" name="tags">
-        </div>
-
-      </div>
-
-      <div>
-        <label>Schedule:</label>
-
-      </div>
-
-      <div>
-        <label for="data_fine">Data Fine:</label>
-        <input type="text" id="data_fine" name="data_inizio">
-      </div>
-
-      <div>
-        <label for="luogo">Luogo:</label>
-        <input type="text" id="luogo" name="luogo">
-      </div>
-
-      <div>
-        <label for="informazioni_aggiuntive">Info Aggiuntive:</label>
-        <input type="text" id="informazioni_aggiuntive" name="informazioni_aggiuntive">
-      </div>
-    </form>
-    {% include './fragments/footer.html' %}
 </body>
+
+<script>
+  function toggleBudgetFields() {
+    var budgetFields = document.getElementById("budget_fields");
+    budgetFields.style.display = document.getElementById("include_budget").checked ? "block" : "none";
+  }
+
+  function toggleScheduleFields() {
+    var scheduleFields = document.getElementById("schedule_fields");
+    scheduleFields.style.display = document.getElementById("include_schedule").checked ? "block" : "none";
+  }
+
+  function addSpesaField() {
+    var speseList = document.getElementById("spese");
+    var spesaIndex = speseList.getElementsByTagName("li").length + 1;
+
+    var li = document.createElement("li");
+
+    var costoLabel = document.createElement("label");
+    costoLabel.setAttribute("for", "costo" + spesaIndex);
+    costoLabel.textContent = "Costo:";
+    li.appendChild(costoLabel);
+
+    var costoInput = document.createElement("input");
+    costoInput.setAttribute("type", "text");
+    costoInput.setAttribute("id", "costo" + spesaIndex);
+    costoInput.setAttribute("name", "costo" + spesaIndex);
+    li.appendChild(costoInput);
+
+    var descrizioneLabel = document.createElement("label");
+    descrizioneLabel.setAttribute("for", "descrizione" + spesaIndex);
+    descrizioneLabel.textContent = "Descrizione:";
+    li.appendChild(descrizioneLabel);
+
+    var descrizioneInput = document.createElement("input");
+    descrizioneInput.setAttribute("type", "text");
+    descrizioneInput.setAttribute("id", "descrizione" + spesaIndex);
+    descrizioneInput.setAttribute("name", "descrizione" + spesaIndex);
+    li.appendChild(descrizioneInput);
+
+    speseList.appendChild(li);
+  }
+  function addAttivitaField() {
+    var attivitaList = document.getElementById("attivita");
+    var attivitaIndex = attivitaList.getElementsByTagName("li").length + 1;
+
+    var li = document.createElement("li");
+
+    var nomeLabel = document.createElement("label");
+    nomeLabel.setAttribute("for", "nome" + attivitaIndex);
+    nomeLabel.textContent = "Nome:";
+    li.appendChild(nomeLabel);
+
+    var nomeInput = document.createElement("input");
+    nomeInput.setAttribute("type", "text");
+    nomeInput.setAttribute("id", "nome" + attivitaIndex);
+    nomeInput.setAttribute("name", "nome" + attivitaIndex);
+    li.appendChild(nomeInput);
+
+    var orarioInizioLabel = document.createElement("label");
+    orarioInizioLabel.setAttribute("for", "orario_inizio" + attivitaIndex);
+    orarioInizioLabel.textContent = "Orario inizio:";
+    li.appendChild(orarioInizioLabel);
+
+    var orarioInizioInput = document.createElement("input");
+    orarioInizioInput.setAttribute("type", "text");
+    orarioInizioInput.setAttribute("id", "orario_inizio" + attivitaIndex);
+    orarioInizioInput.setAttribute("name", "orario_inizio" + attivitaIndex);
+    li.appendChild(orarioInizioInput);
+
+    var orarioFineLabel = document.createElement("label");
+    orarioFineLabel.setAttribute("for", "orario_fine" + attivitaIndex);
+    orarioFineLabel.textContent = "Orario fine:";
+    li.appendChild(orarioFineLabel);
+
+    var orarioFineInput = document.createElement("input");
+    orarioFineInput.setAttribute("type", "text");
+    orarioFineInput.setAttribute("id", "orario_fine" + attivitaIndex);
+    orarioFineInput.setAttribute("name", "orario_fine" + attivitaIndex);
+    li.appendChild(orarioFineInput);
+
+    attivitaList.appendChild(li);
+  }
+</script>
+
 </html>
