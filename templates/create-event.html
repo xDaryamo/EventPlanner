@@ -49,6 +49,7 @@
             <input type="text" id="costo1" name="costo1">
             <label for="descrizione1">Descrizione:</label>
             <input type="text" id="descrizione1" name="descrizione1">
+             <button type="button" onclick="removeSpesaField(this)">Rimuovi</button>
           </li>
         </ul>
 
@@ -69,6 +70,7 @@
             <input type="text" id="orario_inizio1" name="orario_inizio1">
             <label for="orario_fine1">Orario fine:</label>
             <input type="text" id="orario_fine1" name="orario_fine1">
+            <button type="button" onclick="removeAttivitaField(this)">Rimuovi</button>
           </li>
         </ul>
 
@@ -120,6 +122,12 @@
     descrizioneInput.setAttribute("name", "descrizione" + spesaIndex);
     li.appendChild(descrizioneInput);
 
+    var removeButton = document.createElement("button");
+    removeButton.setAttribute("type", "button");
+    removeButton.setAttribute("onclick", "removeSpesaField(this)");
+    removeButton.textContent = "Rimuovi";
+    li.appendChild(removeButton);
+
     speseList.appendChild(li);
   }
   function addAttivitaField() {
@@ -161,7 +169,25 @@
     orarioFineInput.setAttribute("name", "orario_fine" + attivitaIndex);
     li.appendChild(orarioFineInput);
 
+    var removeButton = document.createElement("button");
+    removeButton.setAttribute("type", "button");
+    removeButton.setAttribute("onclick", "removeAttivitaField(this)");
+    removeButton.textContent = "Rimuovi";
+    li.appendChild(removeButton);
+
     attivitaList.appendChild(li);
+  }
+
+  function removeSpesaField(button) {
+    var li = button.parentNode;
+    var ul = li.parentNode;
+    ul.removeChild(li);
+  }
+
+  function removeAttivitaField(button) {
+    var li = button.parentNode;
+    var ul = li.parentNode;
+    ul.removeChild(li);
   }
 </script>
 
