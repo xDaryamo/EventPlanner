@@ -24,6 +24,16 @@ class Event:
     def get_all_events_by_user(self, user_id):
         events = self.events_collection.find({'userId': user_id})
         return events
+
+    def get_all_events_by_year_month(self, user_id, data_inizio, data_fine):
+        events = self.events_collection.find({
+            'userId': user_id,
+            "data_inizio": {
+                "$gte": data_inizio,
+                "$lte": data_fine
+            }
+        })
+        return events
     def update_event(self, event_id, updated_data):
         result = self.events_collection.update_one({'_id': event_id}, {'$set': updated_data})
         return result.modified_count > 0

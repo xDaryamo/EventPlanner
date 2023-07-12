@@ -37,14 +37,51 @@ orari_fine = ["15:00", "16:00", "17:00", "18:00", "19:00"]
 # Generazione di dati casuali per le descrizioni delle spese
 descrizioni_spese = ["Catering", "Noleggio attrezzature", "Servizi audiovisivi", "Decorazioni"]
 
+
+
+import random
+from datetime import datetime, timedelta
+
+def generate_random_date():
+    # Genera una data casuale tra il 1 gennaio 2000 e il 31 dicembre 2023
+    start_date = datetime(2023, 5, 1)
+    end_date = datetime(2023, 8, 31)
+
+    # Calcola la differenza tra le due date
+    delta = end_date - start_date
+
+    # Genera un numero di giorni casuale all'interno dell'intervallo
+    random_days = random.randint(0, delta.days)
+
+    # Aggiungi i giorni casuali alla data di inizio per ottenere la data finale
+    random_date_start = start_date + timedelta(days=random_days)
+
+    # Genera una durata casuale tra 0 e 3 giorni
+    event_duration = random.randint(0, 3)
+
+    # Limita la durata dell'evento se necessario per evitare che siano più di 3 giorni tra la data di inizio e la data di fine
+    if event_duration > (delta.days - random_days):
+        event_duration = delta.days - random_days
+
+    # Aggiungi la durata dell'evento alla data di inizio per ottenere la data di fine
+    random_date_end = random_date_start + timedelta(days=event_duration)
+
+    # Formatta le date nel formato "yyyy-mm-dd"
+    formatted_start_date = random_date_start.strftime("%Y-%m-%d")
+    formatted_end_date = random_date_end.strftime("%Y-%m-%d")
+
+    return formatted_start_date, formatted_end_date
+
+
+
 # Funzione per generare un evento casuale
 def genera_evento(user_id):
     nome = fake.catch_phrase()
     categoria = choice(categorie)
     num_tags = choice(range(1, 4))  # Numero casuale di tag da selezionare
     tag = choices(tags[categoria], k=num_tags)  # Seleziona casualmente i tag dalla lista corrispondente alla categoria
-    data_inizio = datetime.now() + timedelta(days=30)
-    data_fine = data_inizio + timedelta(days=2)
+    data_inizio, data_fine = generate_random_date()
+
 
     luogo = fake.address()
     informazioni_aggiuntive = fake.paragraph()

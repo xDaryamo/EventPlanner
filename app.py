@@ -1,6 +1,8 @@
+import datetime
+
 from bcrypt import hashpw, gensalt
 from bson import ObjectId
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from pymongo import MongoClient
 
 from form_logic.form import EventForm, BudgetForm, ScheduleForm, ActivityForm, ExpenseForm
@@ -119,7 +121,7 @@ def register():
     else:
         return render_template('register.html')
 
-@app.route('/evento/creazione', methods=['GET', 'POST'])
+@app.route('/event/create', methods=['GET', 'POST'])
 def create_event():
     # Estrazione dati evento
     form = EventForm(request.form)
@@ -203,6 +205,20 @@ def create_event():
         return redirect(url_for('evento_dettaglio'))
     return render_template('index.html', form=form)#todo
 
+@app.route("/events", methods=['GET'])
+def get_user_month_events():
+    user = session.get('user')  # Ottieni l'utente dalla sessione
+    mese = int(request.args.get('mese'))
+    anno = int(request.args.get('anno'))
+
+    # Costruisci le date di inizio e fine per il mese e anno specificati
+    data_inizio = f"{anno}-{mese:02d}-01"
+    data_fine = f"{anno}-{mese:02d}-31"
+
+    event_model = Event()
+    events = event_model.get_all_events_by_year_month(user, data_inizio, data_fine)
+
+    return jsonify(list(events))
 
 if __name__ == '__main__':
     app.run(debug=True)
