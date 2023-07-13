@@ -133,7 +133,7 @@ def create_event():
     if request.method == 'POST':
 
         id_evento = str(ObjectId())
-        nome_evento = request.form['nome']
+        nome_evento = request.form['nome_evento']
         categoria = request.form['categoria']
 
         tags = request.form['tags']
@@ -229,9 +229,148 @@ def create_event():
     return render_template('index.html')
 
 
+# Modifica di un evento
+@app.route('/update-event', methods=['GET', 'POST'])
+def update_event():
+    if request.method == 'GET':
+        event_id = request.args.get('event-id')
+        event_retrieved = event_model.get_event(event_id)
 
-@app.route('/update-event', methods=['GET'])
+        return render_template('modify-event.html', event=event_retrieved)
 
+    if request.method == 'POST':
+        event_id = request.form['event_id']
+        event_retrieved = event_model.get_event(event_id)
+
+        event_data = {
+            'nome': request.form['nome_evento'],
+            'categoria': request.form['categoria'],
+            'tags': request.form['tags'],
+            'data_inizio': request.form['data_inizio'],
+            'data_fine': request.form['data_fine'],
+            'luogo': request.form['luogo'],
+            'informazioni_aggiuntive': request.form['informazioni_aggiuntive'],
+        }
+
+        if 'include_budget' in request.form:
+
+            action = 'update'
+            budget_data = {
+                '_id': None,
+                'id_evento': event_id,
+                'totale_spesa': request.form['totale_spesa'],
+                'spese': None
+            }
+
+            if event_retrieved['budgetId']:
+                id_budget = request.form['budget_id']
+            else:
+                action = 'create'
+                id_budget = str(ObjectId())
+
+            budget_data['_id'] = id_budget
+
+            spese = []
+            for key, value in request.form.items():
+                if key.startswith('costo') and value:
+                    spesa_num = key.replace('costo', '')
+                    descrizione = request.form.get(f'descrizione{spesa_num}')
+
+                    spesa = {
+                        '_id': None,
+                        'id_budget': id_budget,
+                        'costo': value,
+                        'descrizione': descrizione
+                    }
+
+                    id_spesa = request.form[f'spesa_id{spesa_num}']
+
+                    if not id_spesa:
+                        spesa['_id'] = str(ObjectId())
+                        expense_model.create_expense(spesa)
+                        spese.append(spesa['_id'])
+
+                    else:
+                        spesa['_id'] = id_spesa
+                        expense_model.update_expense(id_spesa, spesa)
+                        spese.append(id_spesa)
+
+            budget_data['spese'] = spese
+
+            if action == 'update':
+                budget_model.update_budget(id_budget, budget_data)
+
+            else:
+                budget_model.create_budget(budget_data)
+
+            event_data['budgetId'] = budget_data['_id']
+
+        if 'include_schedule' in request.form:
+
+            action = 'update'
+
+            schedule_data = {
+                '_id': None,
+                'id_evento': event_id,
+                'activities': None
+            }
+
+            if event_retrieved['scheduleId']:
+                id_schedule = request.form['schedule_id']
+            else:
+                action = 'create'
+                id_schedule = str(ObjectId())
+
+            schedule_data['_id'] = id_schedule
+
+            attivita = []
+
+            for key, value in request.form.items():
+                if key.startswith('actname') and value:
+                    num_attivita = key.replace('actname', '')
+                    orario_inizio = request.form.get(f'orario_inizio{num_attivita}')
+                    orario_fine = request.form.get(f'orario_fine{num_attivita}')
+
+                    act = {
+                        '_id': None,
+                        'id_schedule': id_schedule,
+                        'nome': value,
+                        'orario_inizio': orario_inizio,
+                        'orario_fine': orario_fine
+                    }
+
+                    id_attivita = request.form[f'act_id{num_attivita}']
+
+                    if not id_attivita:
+                        act['_id'] = str(ObjectId())
+                        activity_model.create_activity(act)
+                        attivita.append(act['_id'])
+
+                    else:
+                        act['_id'] = id_attivita
+                        activity_model.update_activity(id_attivita, act)
+                        attivita.append(id_attivita)
+
+            schedule_data['activities'] = attivita
+
+            if action == 'update':
+                schedule_model.update_schedule(id_schedule, schedule_data)
+
+            else:
+                schedule_model.create_schedule(schedule_data)
+
+            event_data['scheduleId'] = schedule_data['_id']
+
+        event_model.update_event(event_id, event_data)
+        return redirect(url_for('index'))
+
+
+# Cancellazione di un evento
+@app.route('/delete_event', methods=['GET'])
+def delete_event(event_id):
+    request.args.get('event-id')
+    event_model.delete_event(event_id)
+    return redirect(url_for('index'))
 
 
 @app.route("/events", methods=['GET'])
