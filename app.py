@@ -137,8 +137,9 @@ def create_event():
         return render_template('create-event.html', giorno=start_day, mese=start_month, anno=start_year)
 
     if request.method == 'POST':
+
         id_evento = str(ObjectId())
-        nome_evento = request.form['nome_evento']
+        nome_evento = request.form['nome']
         categoria = request.form['categoria']
 
         tags = request.form['tags']
@@ -201,9 +202,10 @@ def create_event():
         }
 
         schedule_model.create_schedule(schedule_item)
-
+        print(id_evento)
         # Creazione del documento evento
         evento = {
+            '_id': id_evento,
             'nome': nome_evento,
             'categoria': categoria,
             'tags': tags_list,

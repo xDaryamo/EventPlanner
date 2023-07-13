@@ -69,13 +69,48 @@ function convertMonthToNumber(monthString) {
         "october": 10,
         "november": 11,
         "december": 12
-    };
+    }
+
 
     // Converte la stringa del mese in minuscolo e rimuove eventuali spazi extra
     var lowercaseMonth = monthString.toLowerCase().trim();
 
     // Restituisce il numero corrispondente al mese
     return monthMap[lowercaseMonth];
+}
+function confrontaDate(data1, data2) {
+    // Estrarre i valori di anno, mese e giorno dalle date
+    const anno1 = data1.getFullYear();
+    const mese1 = data1.getMonth();
+    const giorno1 = data1.getDate();
+
+    const anno2 = data2.getFullYear();
+    const mese2 = data2.getMonth();
+    const giorno2 = data2.getDate();
+
+    // Confronto dell'anno
+    if (anno1 < anno2) {
+        return -1;
+    } else if (anno1 > anno2) {
+        return 1;
+    }
+
+    // Confronto del mese
+    if (mese1 < mese2) {
+        return -1;
+    } else if (mese1 > mese2) {
+        return 1;
+    }
+
+    // Confronto del giorno
+    if (giorno1 < giorno2) {
+        return -1;
+    } else if (giorno1 > giorno2) {
+        return 1;
+    }
+
+    // Le date sono uguali
+    return 0;
 }
 
 $(document).ready(function() {
@@ -114,9 +149,12 @@ $(document).ready(function() {
             response.forEach(function(event) {
                 var dataInizio = new Date(event.data_inizio);
                 var dataFine = new Date(event.data_fine);
-                var giorni = getDaysArray(dataInizio, dataFine);
+                var giorni = getDaysArray(dataInizio, dataFine, mese);
+                //console.log('inizio'+event.data_inizio)
+                //console.log('fine'+event.data_fine)
                 giorni.forEach(function(giorno) {
                     var giornoNumero = giorno.getDate();
+                    //console.log(giornoNumero)
                     $(".calendar .days li:not(.inactive)").filter(function() {
                         return $(this).text().trim() === giornoNumero.toString();
                     }).append("<span class='event-indicator'></span>");
@@ -125,12 +163,18 @@ $(document).ready(function() {
         })
     }
     // Funzione per ottenere un array di date tra la data di inizio e la data di fine inclusi
-    function getDaysArray(dataInizio, dataFine) {
+    function getDaysArray(dataInizio, dataFine, mese) {
         var arr = [];
         var currDate = new Date(dataInizio);
-        while (currDate <= dataFine) {
-            arr.push(new Date(currDate));
+        while (confrontaDate(currDate, dataFine) <= 0 ) {
+            console.log(currDate)
+            if (currDate.getMonth() === mese - 1) {
+
+                arr.push(new Date(currDate));
+            }
             currDate.setDate(currDate.getDate() + 1);
+
+
         }
         return arr;
     }
@@ -151,7 +195,7 @@ $(document).ready(function() {
             var url = '/update-event?day=' + day + '&month=' + month + '&year=' + year;
         }
         else {
-            var url = createEventURL +'?day=' + encodeURIComponent(day) + '&month=' + encodeURIComponent(month) + '&year=' + encodeURIComponent(year);
+            var url = '/insert-event?day=' + encodeURIComponent(day) + '&month=' + encodeURIComponent(month) + '&year=' + encodeURIComponent(year);
         }
 
 

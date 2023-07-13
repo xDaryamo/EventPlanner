@@ -26,14 +26,29 @@ class Event:
         return events
 
     def get_all_events_by_year_month(self, user_id, data_inizio, data_fine):
-        events = self.events_collection.find({
+        events_start = self.events_collection.find({
             'userId': user_id,
             "data_inizio": {
                 "$gte": data_inizio,
                 "$lte": data_fine
             }
         })
-        return events
+        events_end = self.events_collection.find({
+            'userId': user_id,
+            "data_fine": {
+                "$gte": data_inizio,
+                "$lte": data_fine
+            }
+        })
+        # Converti i cursor in liste
+        events_start_list = list(events_start)
+        events_end_list = list(events_end)
+
+        # Unione senza ripetizioni tra i due insiemi
+        events_union = events_start_list + [event for event in events_end_list if event not in events_start_list]
+
+
+        return events_union
     def update_event(self, event_id, updated_data):
         result = self.events_collection.update_one({'_id': event_id}, {'$set': updated_data})
         return result.modified_count > 0
