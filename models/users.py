@@ -17,9 +17,7 @@ class User:
             return None
 
     def get_user(self, user_id):
-        user = self.users_collection.find_one({'_id': ObjectId(user_id)})
-        if user:
-            user['_id'] = str(user['_id'])
+        user = self.users_collection.find_one({'_id': user_id})
         return user
     def get_user_by_email(self, email):
         user = self.users_collection.find_one({'email': email})

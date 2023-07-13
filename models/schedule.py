@@ -14,7 +14,7 @@ class Schedule:
             return None
 
     def get_schedule(self, schedule_id):
-        schedule = self.schedule_collection.find_one({'_id': ObjectId(schedule_id)})
+        schedule = self.schedule_collection.find_one({'_id': schedule_id})
         return schedule
 
     def update_schedule(self, schedule_id, updated_data):
@@ -27,15 +27,15 @@ class Schedule:
 
     def add_activity(self, schedule_id, activity_id):
         result = self.schedule_collection.update_one(
-            {'_id': ObjectId(schedule_id)},
-            {'$addToSet': {'activities': ObjectId(activity_id)}}
+            {'_id': schedule_id},
+            {'$addToSet': {'activities': activity_id}}
         )
         return result.modified_count > 0
 
     def remove_activity(self, schedule_id, activity_id):
         result = self.schedule_collection.update_one(
-            {'_id': ObjectId(schedule_id)},
-            {'$pull': {'activities': ObjectId(activity_id)}}
+            {'_id': schedule_id},
+            {'$pull': {'activities': activity_id}}
         )
         return result.modified_count > 0
 

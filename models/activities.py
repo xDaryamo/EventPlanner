@@ -14,7 +14,7 @@ class Activity:
             return None
 
     def get_activity(self, activity_id):
-        schedule = self.activities_collection.find_one({'_id': ObjectId(activity_id)})
+        schedule = self.activities_collection.find_one({'_id': activity_id})
         return schedule
 
     def update_activity(self, activity_id, updated_data):

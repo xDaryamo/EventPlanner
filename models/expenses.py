@@ -14,7 +14,7 @@ class Expense:
             return None
 
     def get_expense(self, expense_id):
-        expense = self.expenses_collection.find_one({'_id': ObjectId(expense_id)})
+        expense = self.expenses_collection.find_one({'_id': expense_id})
         return expense
 
     def update_expense(self, expense_id, updated_data):

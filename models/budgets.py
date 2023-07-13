@@ -14,7 +14,7 @@ class Budget:
             return None
 
     def get_budget(self, budget_id):
-        budgets = self.budgets_collection.find_one({'_id': ObjectId(budget_id)})
+        budgets = self.budgets_collection.find_one({'_id': budget_id})
         return budgets
 
     def update_budget(self, budget_id, updated_data):
@@ -27,14 +27,14 @@ class Budget:
 
     def add_expense(self, budget_id, expense_id):
         result = self.budgets_collection.update_one(
-            {'_id': ObjectId(budget_id)},
-            {'$addToSet': {'activities': ObjectId(expense_id)}}
+            {'_id': budget_id},
+            {'$addToSet': {'spese': expense_id}}
         )
         return result.modified_count > 0
 
     def remove_expense(self, budget_id, expense_id):
-        result = self.schedule_collection.update_one(
-            {'_id': ObjectId(budget_id)},
-            {'$pull': {'activities': ObjectId(expense_id)}}
+        result = self.budgets_collection.update_one(
+            {'_id': budget_id},
+            {'$pull': {'spese': expense_id}}
         )
         return result.modified_count > 0

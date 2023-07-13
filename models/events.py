@@ -14,7 +14,7 @@ class Event:
             return None
 
     def get_event(self, event_id):
-        event = self.events_collection.find_one({'_id': ObjectId(event_id)})
+        event = self.events_collection.find_one({'_id': event_id})
         return event
 
     def get_all_events(self):

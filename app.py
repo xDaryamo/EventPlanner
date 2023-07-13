@@ -10,10 +10,9 @@ from models.budgets import Budget
 from models.expenses import Expense
 from models.schedule import Schedule
 from models.activities import Activity
+
 app = Flask(__name__, template_folder="templates")
 app.secret_key = 'key'
-
-
 
 user_model = User()
 event_model = Event()
@@ -21,6 +20,7 @@ budget_model = Budget()
 expense_model = Expense()
 schedule_model = Schedule()
 activity_model = Activity()
+
 
 @app.route('/')
 def index():
@@ -38,7 +38,6 @@ def index():
     else:
         # Utente non autenticato, reindirizza alla pagina di login
         return redirect(url_for('login'))
-
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -65,6 +64,7 @@ def login():
 
     return render_template('login.html')
 
+
 @app.route('/logout')
 def logout():
     if 'user' in session:
@@ -72,6 +72,7 @@ def logout():
         session.pop('user', None)
         # Reindirizza alla pagina di login
         return redirect(url_for('login'))
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -119,20 +120,13 @@ def register():
     else:
         return render_template('register.html')
 
+
 @app.route('/insert-event', methods=['GET', 'POST'])
 def create_event():
-
-    global id_schedule
-    global id_budget
-
     if request.method == 'GET':
         start_day = request.args.get('day')
         start_month = request.args.get('month')
         start_year = request.args.get('year')
-
-        print(start_day)
-        print(start_month)
-        print(start_year)
 
         return render_template('create-event.html', giorno=start_day, mese=start_month, anno=start_year)
 
@@ -145,7 +139,7 @@ def create_event():
         tags = request.form['tags']
         tags_list = [tag.strip() for tag in tags.split(',')]
 
-        #Aggiungere i controlli sulla data
+        # Aggiungere i controlli sulla data
         data_inizio = request.form['data_inizio']
         data_fine = request.form['data_fine']
 
@@ -153,57 +147,68 @@ def create_event():
         informazioni_aggiuntive = request.form['informazioni_aggiuntive']
 
         include_budget = request.form.get('include_budget')
-        id_budget = str(ObjectId())
+        id_budget = None
 
         if include_budget:
+            id_budget = str(ObjectId())
             totale_spesa = request.form['totale_spesa']
+
             spese = []
-            for i in range(1, len(request.form.getlist('costo')) + 1):
-                id_spesa = str(ObjectId())
-                costo = request.form['costo{}'.format(i)]
-                descrizione = request.form['descrizione{}'.format(i)]
-                spesa = { '_id': id_spesa, 'id_budget': id_budget,'costo': costo, 'descrizione': descrizione}
-                expense_model.create_expense(spesa)
-                spese.append(id_spesa)
-        else:
-            totale_spesa = None
-            spese = []
+            for key, value in request.form.items():
+                if key.startswith('costo') and value:
+                    spesa_num = key.replace('costo', '')
+                    descrizione = request.form.get(f'descrizione{spesa_num}')
+                    spesa = {
+                        '_id': str(ObjectId()),
+                        'id_budget': id_budget,
+                        'costo': value,
+                        'descrizione': descrizione
+                    }
+                    expense_model.create_expense(spesa)
+                    spese.append(spesa['_id'])
 
-        include_schedule = request.form.get('include_schedule')
-        id_schedule = str(ObjectId())
-
-        if include_schedule:
-            attivita = []
-            for i in range(1, len(request.form.getlist('nome')) + 1):
-                id_attivita = str(ObjectId())
-                nome_act = request.form['nome{}'.format(i)]
-                orario_inizio = request.form['orario_inizio{}'.format(i)]
-                orario_fine = request.form['orario_fine{}'.format(i)]
-                attivita_item = {'_id': id_attivita,'id_schedule': id_schedule ,'nome': nome_act,
-                                 'orario_inizio': orario_inizio, 'orario_fine': orario_fine}
-                activity_model.create_activity(attivita_item)
-                attivita.append(id_attivita)
-        else:
-            attivita = []
-
-        budget_item = {
+            budget_item = {
                 "_id": id_budget,
                 "id_evento": id_evento,
                 'totale_spesa': totale_spesa,
                 'spese': spese
-        }
+            }
 
-        budget_model.create_budget(budget_item)
+            budget_model.create_budget(budget_item)
 
-        schedule_item = {
+        include_schedule = request.form.get('include_schedule')
+        id_schedule = None
+
+        if include_schedule:
+            id_schedule = str(ObjectId())
+            attivita = []
+
+            for key, value in request.form.items():
+                if key.startswith('nome') and value:
+                    activitiy_num = key.replace('nome', '')
+                    orario_inizio = request.form.get(f'orario_inizio{activitiy_num}')
+                    orario_fine = request.form.get(f'orario_fine{activitiy_num}')
+                    activity = {
+                        '_id': str(ObjectId()),
+                        'id_schedule': id_schedule,
+                        'nome': value,
+                        'orario_inizio': orario_inizio,
+                        'orario_fine': orario_fine
+                    }
+
+                    activity_model.create_activity(activity)
+                    attivita.append(activity['_id'])
+
+            schedule_item = {
                 "_id": id_schedule,
                 "id_evento": id_evento,
                 'attivita': attivita
-        }
+            }
 
-        schedule_model.create_schedule(schedule_item)
-        print(id_evento)
+            schedule_model.create_schedule(schedule_item)
+
         # Creazione del documento evento
+
         evento = {
             '_id': id_evento,
             'nome': nome_evento,
@@ -228,6 +233,7 @@ def create_event():
 @app.route('/update-event', methods=['GET'])
 
 
+
 @app.route("/events", methods=['GET'])
 def get_user_month_events():
     user = session.get('user')  # Ottieni l'utente dalla sessione
@@ -242,6 +248,70 @@ def get_user_month_events():
     events = event_model.get_all_events_by_year_month(user, data_inizio, data_fine)
 
     return jsonify(list(events))
+
+
+@app.route("/get_budget", methods=['GET'])
+def get_budget():
+    budget_id = request.args.get('budget-id')
+    budget_retrieved = budget_model.get_budget(budget_id)
+
+    spese = []
+    for spesa in budget_retrieved['spese']:
+        spese.append(expense_model.get_expense(spesa))
+
+    budget = {
+        '_id': budget_retrieved['_id'],
+        'id_evento': budget_retrieved['id_evento'],
+        'totale_spendere': budget_retrieved['totale_spendere'],
+        'spese': spese
+    }
+
+    return jsonify(budget)
+
+@app.route("/get_schedule", methods=['GET'])
+def get_schedule():
+    schedule_id = request.args.get('schedule-id')
+    schedule_retrieved = schedule_model.get_schedule(schedule_id)
+
+    attivita = []
+    for act in schedule_retrieved['activities']:
+        attivita.append(activity_model.get_activity(act))
+
+
+    schedule = {
+        '_id': schedule_retrieved['_id'],
+        'id_evento': schedule_retrieved['id_evento'],
+        'activities': attivita
+    }
+
+    return jsonify(schedule)
+
+@app.route("/delete_expense", methods=['GET'])
+def delete_expense():
+    expense_id = request.args.get('expense_id')
+    budget_id = request.args.get('budget_id')
+
+    budget_model.remove_expense(budget_id, expense_id)
+
+    expense_model.delete_expense(expense_id)
+
+    return jsonify({ 'message':'deleted'})
+
+
+@app.route("/delete_activity", methods=['GET'])
+def delete_activity():
+    act_id = request.args.get('activity_id')
+    schedule_id = request.args.get('schedule_id')
+
+    schedule_model.remove_activity(schedule_id, act_id)
+
+    activity_model.delete_activity(act_id)
+
+    return jsonify({ 'message':'deleted'})
+
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
