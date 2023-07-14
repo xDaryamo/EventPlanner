@@ -140,17 +140,21 @@
   });
 
   function getBudgetDetails(budgetId) {
+
     $.ajax({
       url: "/get_budget?budget-id=" + budgetId,
       type: 'GET',
       success: function(response) {
         // Esegui le operazioni necessarie con i dettagli del budget restituiti dal server
-        console.log(response); // Esempio: visualizza i dettagli del budget nella console
+        //console.log(response); // Esempio: visualizza i dettagli del budget nella console
 
         // Mostra le spese nel front-end
         var expenses = response.spese;
         $('#spese').empty(); // Rimuovi eventuali spese precedenti
 
+        let totale_spesa = response.totale_spendere
+        $('#tot').val(totale_spesa);
+        $('#totale_spesa').text('Totale spesa: ' + totale_spesa);
         expenses.forEach(function(spesa, index) {
           var spesaId = spesa._id;
 
@@ -183,7 +187,7 @@
       type: 'GET',
       success: function(response) {
         // Esegui le operazioni necessarie con i dettagli dello schedule restituiti dal server
-        console.log(response); // Esempio: visualizza i dettagli del budget nella console
+        //console.log(response); // Esempio: visualizza i dettagli del budget nella console
 
         // Mostra le attivita nel front-end
         var acts = response.activities;
