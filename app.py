@@ -252,13 +252,16 @@ def update_event():
             'informazioni_aggiuntive': request.form['informazioni_aggiuntive'],
         }
 
+        totale_spesa = 0
+
         if 'include_budget' in request.form:
 
             action = 'update'
+
             budget_data = {
                 '_id': None,
                 'id_evento': event_id,
-                'totale_spesa': request.form['totale_spesa'],
+                'totale_spendere': request.form['tot'],
                 'spese': None
             }
 
@@ -430,9 +433,10 @@ def delete_expense():
     expense_id = request.args.get('expense_id')
     budget_id = request.args.get('budget_id')
 
-    budget_model.remove_expense(budget_id, expense_id)
-
-    expense_model.delete_expense(expense_id)
+    if expense_id:
+        print(expense_id)
+        budget_model.remove_expense(budget_id, expense_id)
+        expense_model.delete_expense(expense_id)
 
     return jsonify({ 'message':'deleted'})
 
@@ -447,10 +451,6 @@ def delete_activity():
     activity_model.delete_activity(act_id)
 
     return jsonify({ 'message':'deleted'})
-
-
-
-
 
 if __name__ == '__main__':
     app.run(debug=True)

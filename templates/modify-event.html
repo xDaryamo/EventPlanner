@@ -43,8 +43,9 @@
 
       <div id="budget_fields" style="display:none;">
         <input type="hidden" id="budget_id" name="budget_id" value="{{ event.budgetId }}">
-        <label for="totale_spesa">Totale spesa:</label>
-        <input type="text" id="totale_spesa" name="totale_spesa"><br>
+
+        <span id="totale_spesa"></span><br>
+        <input type="hidden" id="tot" name="tot" value="{}}">
 
         <label for="spese">Spese:</label>
         <ul id="spese">
@@ -75,6 +76,27 @@
   </form>
 
   <script>
+   function calcolaTotaleSpesa() {
+
+
+
+     $('input[id^="costo"]').on('input', function() {
+      let totale_spesa = 0;
+      $('input[id^="costo"]').each(function() {
+        var valore = parseFloat($(this).val());
+        console.log(valore);
+        if (!isNaN(valore)) {
+          totale_spesa += valore;
+        }
+     });
+     $('#tot').val(totale_spesa);
+     $('#totale_spesa').text('Totale spesa: ' + totale_spesa);
+
+     });
+
+
+   }
+
   $(document).ready(function (){
     function handleIncludeBudgetChange() {
       let isBudgetIncluded = $('#include_budget').is(':checked');
@@ -125,7 +147,6 @@
         // Esegui le operazioni necessarie con i dettagli del budget restituiti dal server
         console.log(response); // Esempio: visualizza i dettagli del budget nella console
 
-        $('#totale_spesa').attr('value', response.totale_spendere);
         // Mostra le spese nel front-end
         var expenses = response.spese;
         $('#spese').empty(); // Rimuovi eventuali spese precedenti
@@ -151,6 +172,9 @@
         console.error(error); // Gestisci gli errori in caso di problemi con la richiesta AJAX
       }
     });
+
+    calcolaTotaleSpesa();
+
   }
 
   function getScheduleDetails(scheduleId) {
@@ -230,6 +254,9 @@
       li.appendChild(removeButton);
 
       speseList.appendChild(li);
+
+      calcolaTotaleSpesa();
+
     }
 
     function addAttivitaField() {
@@ -299,12 +326,14 @@
         success: function(response) {
           alert("Spesa cancellata con successo!");
             console.log('spesa rimossa')
+
           },
           error: function(xhr, status, error) {
             alert("Si è verificato un errore durante la cancellazione della spesa: " + error);
           }
         });
 
+        calcolaTotaleSpesa();
     }
 
     function removeAttivitaField(button) {
@@ -343,6 +372,7 @@
         });
       }
     }
+
   </script>
 </body>
 
