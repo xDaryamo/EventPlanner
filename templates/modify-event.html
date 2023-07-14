@@ -2,17 +2,17 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Modifica Evento</title>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-  <link rel="stylesheet" href="/static/style.css">
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifica Evento</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </head>
 
 <body>
-  <form method="POST" action="{{ url_for('update_event') }}">
+<form method="POST" action="{{ url_for('update_event') }}">
 
     <input type="hidden" id="event_id" name="event_id" value="{{ event._id }}">
     <label for="nome_evento">Nome:</label>
@@ -37,347 +37,360 @@
     <textarea id="informazioni_aggiuntive" name="informazioni_aggiuntive" rows="4" cols="50">{{ event.informazioni_aggiuntive }}</textarea><br>
 
     <fieldset>
-      <legend>Budget</legend>
-      <input type="checkbox" id="include_budget" name="include_budget" {% if event.budgetId %}checked{% endif %}>
-      <label for="include_budget">Includi budget</label><br>
+        <legend>Budget</legend>
+        <input type="checkbox" id="include_budget" name="include_budget" {% if event.budgetId %}checked{% endif %}>
+        <label for="include_budget">Includi budget</label><br>
 
-      <div id="budget_fields" style="display:none;">
-        <input type="hidden" id="budget_id" name="budget_id" value="{{ event.budgetId }}">
+        <div id="budget_fields" style="display:none;">
+            <input type="hidden" id="budget_id" name="budget_id" value="{{ event.budgetId }}">
 
-        <span id="totale_spesa"></span><br>
-        <input type="hidden" id="tot" name="tot" value="{}}">
+            <span id="totale_spesa"></span><br>
+            <input type="hidden" id="tot" name="tot" value="{}}">
 
-        <label for="spese">Spese:</label>
-        <ul id="spese">
-        </ul>
+            <label for="spese">Spese:</label>
+            <ul id="spese">
+            </ul>
 
-        <button type="button" onclick="addSpesaField()">Aggiungi spesa</button>
-      </div>
+            <button type="button" onclick="addSpesaField()">Aggiungi spesa</button>
+        </div>
     </fieldset>
 
     <fieldset>
-      <legend>Schedule</legend>
-      <input type="checkbox" id="include_schedule" name="include_schedule" {% if event.scheduleId %}checked{% endif %}>
-      <label for="include_schedule">Includi schedule</label><br>
+        <legend>Schedule</legend>
+        <input type="checkbox" id="include_schedule" name="include_schedule" {% if event.scheduleId %}checked{% endif %}>
+        <label for="include_schedule">Includi schedule</label><br>
 
-      <div id="schedule_fields" style="display:none;">
-        <input type="hidden" id="schedule_id" name="schedule_id" value="{{ event.scheduleId }}">
+        <div id="schedule_fields" style="display:none;">
+            <input type="hidden" id="schedule_id" name="schedule_id" value="{{ event.scheduleId }}">
 
-        <ul id="attivita">
-        </ul>
+            <ul id="attivita">
+            </ul>
 
-        <button type="button" onclick="addAttivitaField()">Aggiungi attività</button>
-      </div>
+            <button type="button" onclick="addAttivitaField()">Aggiungi attività</button>
+        </div>
     </fieldset>
 
     <button type="button" onclick="deleteEvent()">Cancella Evento</button>
 
     <input type="submit" value="Aggiorna Evento">
-  </form>
+</form>
 
-  <script>
-   function calcolaTotaleSpesa() {
-
-
-
-     $('input[id^="costo"]').on('input', function() {
-      let totale_spesa = 0;
-      $('input[id^="costo"]').each(function() {
-        var valore = parseFloat($(this).val());
-        console.log(valore);
-        if (!isNaN(valore)) {
-          totale_spesa += valore;
-        }
-     });
-     $('#tot').val(totale_spesa);
-     $('#totale_spesa').text('Totale spesa: ' + totale_spesa);
-
-     });
+<script>
+    function calcolaTotaleSpesa() {
 
 
-   }
 
-  $(document).ready(function (){
-    function handleIncludeBudgetChange() {
-      let isBudgetIncluded = $('#include_budget').is(':checked');
-        if (isBudgetIncluded) {
-          let budget_id = $('#budget_id').val();
-          getBudgetDetails(budget_id);
-          $('#budget_fields').show();
-        } else {
-          $('#budget_fields').hide();
-        }
-    }
-    // Rileva il cambiamento iniziale dello stato della checkbox
-    handleIncludeBudgetChange();
-
-    // Rileva i cambiamenti futuri dello stato della checkbox
-    $('#include_budget').change(function() {
-      handleIncludeBudgetChange();
-    });
-
-  });
-
-  $(document).ready(function (){
-    function handleIncludeScheduleChange() {
-      let isScheduleIncluded = $('#include_schedule').is(':checked');
-        if (isScheduleIncluded) {
-          let schedule_id = $('#schedule_id').val();
-          getScheduleDetails(schedule_id);
-          $('#schedule_fields').show();
-        } else {
-          $('#schedule_fields').hide();
-        }
-    }
-    // Rileva il cambiamento iniziale dello stato della checkbox
-    handleIncludeScheduleChange();
-
-    // Rileva i cambiamenti futuri dello stato della checkbox
-    $('#include_schedule').change(function() {
-      handleIncludeScheduleChange();
-    });
-
-  });
-
-  function getBudgetDetails(budgetId) {
-
-    $.ajax({
-      url: "/get_budget?budget-id=" + budgetId,
-      type: 'GET',
-      success: function(response) {
-        // Esegui le operazioni necessarie con i dettagli del budget restituiti dal server
-        //console.log(response); // Esempio: visualizza i dettagli del budget nella console
-
-        // Mostra le spese nel front-end
-        var expenses = response.spese;
-        $('#spese').empty(); // Rimuovi eventuali spese precedenti
-
-        let totale_spesa = response.totale_spendere
+        let totale_spesa = 0;
+        $('input[id^="costo"]').each(function() {
+            var valore = parseFloat($(this).val());
+            if (!isNaN(valore)) {
+                totale_spesa += valore;
+            }
+        });
         $('#tot').val(totale_spesa);
         $('#totale_spesa').text('Totale spesa: ' + totale_spesa);
-        expenses.forEach(function(spesa, index) {
-          var spesaId = spesa._id;
 
-          var costo = spesa.costo;
-          var descrizione = spesa.descrizione;
-
-          var listItem = $('<li>');
-          listItem.append($('<input>', { type: 'hidden', id: 'spesa_id' + index, name: 'spesa_id' + index, value: spesaId }));
-          listItem.append($('<label>', { for: 'costo' + index, text: 'Costo:' }));
-          listItem.append($('<input>', { type: 'text', id: 'costo' + index, name: 'costo' + index, value: costo }));
-          listItem.append($('<label>', { for: 'descrizione' + index, text: 'Descrizione:' }));
-          listItem.append($('<input>', { type: 'text', id: 'descrizione' + index, name: 'descrizione' + index, value: descrizione }));
-          listItem.append($('<button>', { type: 'button', id: 'removeSpesa', text: 'Rimuovi', onclick: 'removeSpesaField(this)', spesa_id: spesaId }));
-
-          $('#spese').append(listItem);
+        $('input[id^="costo"]').on('input', function() {
+            let totale_spesa = 0;
+            $('input[id^="costo"]').each(function() {
+                var valore = parseFloat($(this).val());
+                if (!isNaN(valore)) {
+                    totale_spesa += valore;
+                }
+            });
+            $('#tot').val(totale_spesa);
+            $('#totale_spesa').text('Totale spesa: ' + totale_spesa);
         });
-      },
-      error: function(error) {
-        console.error(error); // Gestisci gli errori in caso di problemi con la richiesta AJAX
-      }
+
+
+
+    }
+
+    $(document).ready(function (){
+        function handleIncludeBudgetChange() {
+            let isBudgetIncluded = $('#include_budget').is(':checked');
+            if (isBudgetIncluded) {
+                let budget_id = $('#budget_id').val();
+                getBudgetDetails(budget_id);
+                $('#budget_fields').show();
+            } else {
+                $('#budget_fields').hide();
+            }
+        }
+        // Rileva il cambiamento iniziale dello stato della checkbox
+        handleIncludeBudgetChange();
+
+        // Rileva i cambiamenti futuri dello stato della checkbox
+        $('#include_budget').change(function() {
+            handleIncludeBudgetChange();
+        });
+
     });
 
-    calcolaTotaleSpesa();
+    $(document).ready(function (){
+        function handleIncludeScheduleChange() {
+            let isScheduleIncluded = $('#include_schedule').is(':checked');
+            if (isScheduleIncluded) {
+                let schedule_id = $('#schedule_id').val();
+                getScheduleDetails(schedule_id);
+                $('#schedule_fields').show();
+            } else {
+                $('#schedule_fields').hide();
+            }
+        }
+        // Rileva il cambiamento iniziale dello stato della checkbox
+        handleIncludeScheduleChange();
 
-  }
-
-  function getScheduleDetails(scheduleId) {
-    $.ajax({
-      url: "/get_schedule?schedule-id=" + scheduleId,
-      type: 'GET',
-      success: function(response) {
-        // Esegui le operazioni necessarie con i dettagli dello schedule restituiti dal server
-        //console.log(response); // Esempio: visualizza i dettagli del budget nella console
-
-        // Mostra le attivita nel front-end
-        var acts = response.activities;
-        $('#attivita').empty(); // Rimuovi eventuali attivita precedenti
-
-        acts.forEach(function(act, index) {
-          var actId = act._id;
-          var nome = act.nome;
-          var orario_inizio = act.orario_inizio;
-          var orario_fine = act.orario_fine;
-          var listItem = $('<li>');
-          listItem.append($('<input>', { type: 'hidden', id: 'act_id' + index, name: 'act_id' + index, value: actId }));
-          listItem.append($('<label>', { for: 'actname' + index, text: 'Nome:' }));
-          listItem.append($('<input>', { type: 'text', id: 'actname' + index, name: 'actname' + index, value: nome }));
-          listItem.append($('<label>', { for: 'orario_inizio' + index, text: 'Orario Inizio:' }));
-          listItem.append($('<input>', { type: 'text', id: 'orario_inizio' + index, name: 'orario_inizio' + index, value: orario_inizio }));
-          listItem.append($('<label>', { for: 'orario_fine' + index, text: 'Orario Fine:' }));
-          listItem.append($('<input>', { type: 'text', id: 'orario_fine' + index, name: 'orario_fine' + index, value: orario_fine }));
-          listItem.append($('<button>', { type: 'button', id: 'removeAct', text: 'Rimuovi', onclick: 'removeAttivitaField(this)', activity_id: actId}));
-
-          $('#attivita').append(listItem);
+        // Rileva i cambiamenti futuri dello stato della checkbox
+        $('#include_schedule').change(function() {
+            handleIncludeScheduleChange();
         });
-      },
-      error: function(error) {
-        console.error(error); // Gestisci gli errori in caso di problemi con la richiesta AJAX
-      }
+
     });
-  }
+
+    function getBudgetDetails(budgetId) {
+
+        $.ajax({
+            url: "/get_budget?budget-id=" + budgetId,
+            type: 'GET',
+            success: function(response) {
+                // Esegui le operazioni necessarie con i dettagli del budget restituiti dal server
+                //console.log(response); // Esempio: visualizza i dettagli del budget nella console
+
+                // Mostra le spese nel front-end
+                var expenses = response.spese;
+                $('#spese').empty(); // Rimuovi eventuali spese precedenti
+
+                let totale_spesa = response.totale_spendere
+                $('#tot').val(totale_spesa);
+                $('#totale_spesa').text('Totale spesa: ' + totale_spesa);
+                expenses.forEach(function(spesa, index) {
+                    var spesaId = spesa._id;
+
+                    var costo = spesa.costo;
+                    var descrizione = spesa.descrizione;
+
+                    var listItem = $('<li>');
+                    listItem.append($('<input>', { type: 'hidden', id: 'spesa_id' + index, name: 'spesa_id' + index, value: spesaId }));
+                    listItem.append($('<label>', { for: 'costo' + index, text: 'Costo:' }));
+                    listItem.append($('<input>', { type: 'text', id: 'costo' + index, name: 'costo' + index, value: costo }));
+                    listItem.append($('<label>', { for: 'descrizione' + index, text: 'Descrizione:' }));
+                    listItem.append($('<input>', { type: 'text', id: 'descrizione' + index, name: 'descrizione' + index, value: descrizione }));
+                    listItem.append($('<button>', { type: 'button', id: 'removeSpesa' + index, text: 'Rimuovi', onclick: 'removeSpesaField(this)', spesa_id: spesaId }));
+
+                    $('#spese').append(listItem);
+                });
+            },
+            error: function(error) {
+                console.error(error); // Gestisci gli errori in caso di problemi con la richiesta AJAX
+            }
+        });
+
+        calcolaTotaleSpesa();
+
+    }
+
+    function getScheduleDetails(scheduleId) {
+        $.ajax({
+            url: "/get_schedule?schedule-id=" + scheduleId,
+            type: 'GET',
+            success: function(response) {
+                // Esegui le operazioni necessarie con i dettagli dello schedule restituiti dal server
+                //console.log(response); // Esempio: visualizza i dettagli del budget nella console
+
+                // Mostra le attivita nel front-end
+                var acts = response.activities;
+                $('#attivita').empty(); // Rimuovi eventuali attivita precedenti
+
+                acts.forEach(function(act, index) {
+                    var actId = act._id;
+                    var nome = act.nome;
+                    var orario_inizio = act.orario_inizio;
+                    var orario_fine = act.orario_fine;
+                    var listItem = $('<li>');
+                    listItem.append($('<input>', { type: 'hidden', id: 'act_id' + index, name: 'act_id' + index, value: actId }));
+                    listItem.append($('<label>', { for: 'actname' + index, text: 'Nome:' }));
+                    listItem.append($('<input>', { type: 'text', id: 'actname' + index, name: 'actname' + index, value: nome }));
+                    listItem.append($('<label>', { for: 'orario_inizio' + index, text: 'Orario Inizio:' }));
+                    listItem.append($('<input>', { type: 'text', id: 'orario_inizio' + index, name: 'orario_inizio' + index, value: orario_inizio }));
+                    listItem.append($('<label>', { for: 'orario_fine' + index, text: 'Orario Fine:' }));
+                    listItem.append($('<input>', { type: 'text', id: 'orario_fine' + index, name: 'orario_fine' + index, value: orario_fine }));
+                    listItem.append($('<button>', { type: 'button', id: 'removeAct', text: 'Rimuovi', onclick: 'removeAttivitaField(this)', activity_id: actId}));
+
+                    $('#attivita').append(listItem);
+                });
+            },
+            error: function(error) {
+                console.error(error); // Gestisci gli errori in caso di problemi con la richiesta AJAX
+            }
+        });
+    }
 
     function addSpesaField() {
-      var speseList = document.getElementById("spese");
-      var spesaIndex = speseList.getElementsByTagName("li").length + 1;
+        var speseList = document.getElementById("spese");
+        var spesaIndex = speseList.getElementsByTagName("li").length + 1;
 
-      var li = document.createElement("li");
+        var li = document.createElement("li");
 
-      var idInput = document.createElement("input");
-      idInput.setAttribute("type", "hidden");
-      idInput.setAttribute("id", "spesa_id" + spesaIndex);
-      idInput.setAttribute("name", "spesa_id" + spesaIndex);
-      li.appendChild(idInput);
+        var idInput = document.createElement("input");
+        idInput.setAttribute("type", "hidden");
+        idInput.setAttribute("id", "spesa_id" + spesaIndex);
+        idInput.setAttribute("name", "spesa_id" + spesaIndex);
+        li.appendChild(idInput);
 
-      var costoLabel = document.createElement("label");
-      costoLabel.setAttribute("for", "costo" + spesaIndex);
-      costoLabel.textContent = "Costo:";
-      li.appendChild(costoLabel);
+        var costoLabel = document.createElement("label");
+        costoLabel.setAttribute("for", "costo" + spesaIndex);
+        costoLabel.textContent = "Costo:";
+        li.appendChild(costoLabel);
 
-      var costoInput = document.createElement("input");
-      costoInput.setAttribute("type", "text");
-      costoInput.setAttribute("id", "costo" + spesaIndex);
-      costoInput.setAttribute("name", "costo" + spesaIndex);
-      li.appendChild(costoInput);
+        var costoInput = document.createElement("input");
+        costoInput.setAttribute("type", "text");
+        costoInput.setAttribute("id", "costo" + spesaIndex);
+        costoInput.setAttribute("name", "costo" + spesaIndex);
+        li.appendChild(costoInput);
 
-      var descrizioneLabel = document.createElement("label");
-      descrizioneLabel.setAttribute("for", "descrizione" + spesaIndex);
-      descrizioneLabel.textContent = "Descrizione:";
-      li.appendChild(descrizioneLabel);
+        var descrizioneLabel = document.createElement("label");
+        descrizioneLabel.setAttribute("for", "descrizione" + spesaIndex);
+        descrizioneLabel.textContent = "Descrizione:";
+        li.appendChild(descrizioneLabel);
 
-      var descrizioneInput = document.createElement("input");
-      descrizioneInput.setAttribute("type", "text");
-      descrizioneInput.setAttribute("id", "descrizione" + spesaIndex);
-      descrizioneInput.setAttribute("name", "descrizione" + spesaIndex);
-      li.appendChild(descrizioneInput);
+        var descrizioneInput = document.createElement("input");
+        descrizioneInput.setAttribute("type", "text");
+        descrizioneInput.setAttribute("id", "descrizione" + spesaIndex);
+        descrizioneInput.setAttribute("name", "descrizione" + spesaIndex);
+        li.appendChild(descrizioneInput);
 
-      var removeButton = document.createElement("button");
-      removeButton.setAttribute("type", "button");
-      removeButton.setAttribute("onclick", "removeSpesaField(this)");
-      removeButton.textContent = "Rimuovi";
-      li.appendChild(removeButton);
+        var removeButton = document.createElement("button");
+        removeButton.setAttribute("type", "button");
+        removeButton.setAttribute("id", 'removeSpesa' + spesaIndex);
+        removeButton.setAttribute("onclick", "removeSpesaField(this)");
+        removeButton.textContent = "Rimuovi";
+        li.appendChild(removeButton);
 
-      speseList.appendChild(li);
+        speseList.appendChild(li);
 
-      calcolaTotaleSpesa();
+        calcolaTotaleSpesa();
 
     }
 
     function addAttivitaField() {
-      var attivitaList = document.getElementById("attivita");
-      var attivitaIndex = attivitaList.getElementsByTagName("li").length + 1;
+        var attivitaList = document.getElementById("attivita");
+        var attivitaIndex = attivitaList.getElementsByTagName("li").length + 1;
 
-      var li = document.createElement("li");
+        var li = document.createElement("li");
 
-      var idInput = document.createElement("input");
-      idInput.setAttribute("type", "hidden");
-      idInput.setAttribute("id", "attivita_id" + attivitaIndex);
-      idInput.setAttribute("name", "attivita_id" + attivitaIndex);
-      li.appendChild(idInput);
+        var idInput = document.createElement("input");
+        idInput.setAttribute("type", "hidden");
+        idInput.setAttribute("id", "attivita_id" + attivitaIndex);
+        idInput.setAttribute("name", "attivita_id" + attivitaIndex);
+        li.appendChild(idInput);
 
-      var nomeLabel = document.createElement("label");
-      nomeLabel.setAttribute("for", "nome" + attivitaIndex);
-      nomeLabel.textContent = "Nome:";
-      li.appendChild(nomeLabel);
+        var nomeLabel = document.createElement("label");
+        nomeLabel.setAttribute("for", "nome" + attivitaIndex);
+        nomeLabel.textContent = "Nome:";
+        li.appendChild(nomeLabel);
 
-      var nomeInput = document.createElement("input");
-      nomeInput.setAttribute("type", "text");
-      nomeInput.setAttribute("id", "nome" + attivitaIndex);
-      nomeInput.setAttribute("name", "nome" + attivitaIndex);
-      li.appendChild(nomeInput);
+        var nomeInput = document.createElement("input");
+        nomeInput.setAttribute("type", "text");
+        nomeInput.setAttribute("id", "nome" + attivitaIndex);
+        nomeInput.setAttribute("name", "nome" + attivitaIndex);
+        li.appendChild(nomeInput);
 
-      var orarioInizioLabel = document.createElement("label");
-      orarioInizioLabel.setAttribute("for", "orario_inizio" + attivitaIndex);
-      orarioInizioLabel.textContent = "Orario inizio:";
-      li.appendChild(orarioInizioLabel);
+        var orarioInizioLabel = document.createElement("label");
+        orarioInizioLabel.setAttribute("for", "orario_inizio" + attivitaIndex);
+        orarioInizioLabel.textContent = "Orario inizio:";
+        li.appendChild(orarioInizioLabel);
 
-      var orarioInizioInput = document.createElement("input");
-      orarioInizioInput.setAttribute("type", "text");
-      orarioInizioInput.setAttribute("id", "orario_inizio" + attivitaIndex);
-      orarioInizioInput.setAttribute("name", "orario_inizio" + attivitaIndex);
-      li.appendChild(orarioInizioInput);
+        var orarioInizioInput = document.createElement("input");
+        orarioInizioInput.setAttribute("type", "text");
+        orarioInizioInput.setAttribute("id", "orario_inizio" + attivitaIndex);
+        orarioInizioInput.setAttribute("name", "orario_inizio" + attivitaIndex);
+        li.appendChild(orarioInizioInput);
 
-      var orarioFineLabel = document.createElement("label");
-      orarioFineLabel.setAttribute("for", "orario_fine" + attivitaIndex);
-      orarioFineLabel.textContent = "Orario fine:";
-      li.appendChild(orarioFineLabel);
+        var orarioFineLabel = document.createElement("label");
+        orarioFineLabel.setAttribute("for", "orario_fine" + attivitaIndex);
+        orarioFineLabel.textContent = "Orario fine:";
+        li.appendChild(orarioFineLabel);
 
-      var orarioFineInput = document.createElement("input");
-      orarioFineInput.setAttribute("type", "text");
-      orarioFineInput.setAttribute("id", "orario_fine" + attivitaIndex);
-      orarioFineInput.setAttribute("name", "orario_fine" + attivitaIndex);
-      li.appendChild(orarioFineInput);
+        var orarioFineInput = document.createElement("input");
+        orarioFineInput.setAttribute("type", "text");
+        orarioFineInput.setAttribute("id", "orario_fine" + attivitaIndex);
+        orarioFineInput.setAttribute("name", "orario_fine" + attivitaIndex);
+        li.appendChild(orarioFineInput);
 
-      var removeButton = document.createElement("button");
-      removeButton.setAttribute("type", "button");
-      removeButton.setAttribute("onclick", "removeAttivitaField(this)");
-      removeButton.textContent = "Rimuovi";
-      li.appendChild(removeButton);
+        var removeButton = document.createElement("button");
+        removeButton.setAttribute("type", "button");
+        removeButton.setAttribute("onclick", "removeAttivitaField(this)");
+        removeButton.textContent = "Rimuovi";
+        li.appendChild(removeButton);
 
-      attivitaList.appendChild(li);
+        attivitaList.appendChild(li);
     }
 
     function removeSpesaField(button) {
-      var li = button.parentNode;
-      var ul = li.parentNode;
-      ul.removeChild(li);
+        var li = button.parentNode;
+        var ul = li.parentNode;
+        ul.removeChild(li);
 
-      id_spesa = $('#removeSpesa').attr('spesa_id')
-      budget_id = $('#budget_id').val();
-      $.ajax({
-        url: "/delete_expense?expense_id="+id_spesa + "&budget_id=" + budget_id,
-        type: "GET",
-        success: function(response) {
-          alert("Spesa cancellata con successo!");
-            console.log('spesa rimossa')
+        button_id = $(button).attr('id');
+        id_spesa = $('#'+button_id).attr('spesa_id')
+        budget_id = $('#budget_id').val();
+        $.ajax({
+            url: "/delete_expense?expense_id="+id_spesa + "&budget_id=" + budget_id,
+            type: "GET",
+            success: function(response) {
+                //alert("Spesa cancellata con successo!");
+                console.log('spesa rimossa')
+                calcolaTotaleSpesa();
 
-          },
-          error: function(xhr, status, error) {
-            alert("Si è verificato un errore durante la cancellazione della spesa: " + error);
-          }
+            },
+            error: function(xhr, status, error) {
+                alert("Si è verificato un errore durante la cancellazione della spesa: " + error);
+            }
         });
 
-        calcolaTotaleSpesa();
+
     }
 
     function removeAttivitaField(button) {
-      var li = button.parentNode;
-      var ul = li.parentNode;
-      ul.removeChild(li);
+        var li = button.parentNode;
+        var ul = li.parentNode;
+        ul.removeChild(li);
 
-      activity_id = $('#removeAct').attr('activity_id');
-      schedule_id = $('#schedule_id').val();
-      $.ajax({
-        url: "/delete_activity?activity_id="+activity_id+"&schedule_id="+schedule_id,
-        type: "GET",
-        success: function(response) {
-          console.log('cancellato');
-        },
-        error: function(xhr, status, error) {
-          alert("Si è verificato un errore durante la cancellazione dell' attivita: " + error);
-        }
-      });
+        button_id = $(button).attr('id');
+        activity_id = $('#'+button_id).attr('activity_id');
+        schedule_id = $('#schedule_id').val();
+        $.ajax({
+            url: "/delete_activity?activity_id="+activity_id+"&schedule_id="+schedule_id,
+            type: "GET",
+            success: function(response) {
+                console.log('cancellato');
+            },
+            error: function(xhr, status, error) {
+                alert("Si è verificato un errore durante la cancellazione dell' attivita: " + error);
+            }
+        });
     }
 
     function deleteEvent() {
-      if (confirm("Sei sicuro di voler cancellare l'evento? Questa azione non può essere annullata.")) {
-        event_id = $('#event_id').attr('value');
-        $.ajax({
-          url: "/delete_event/?event-id="+event_id,
-          type: "GET",
-          success: function(response) {
-            alert("Evento cancellato con successo!");
-            // Redirect a una pagina di conferma o alla lista degli eventi, ad esempio:
-            window.location.href = "{{ url_for('index') }}";
-          },
-          error: function(xhr, status, error) {
-            alert("Si è verificato un errore durante la cancellazione dell'evento: " + error);
-          }
-        });
-      }
+        if (confirm("Sei sicuro di voler cancellare l'evento? Questa azione non può essere annullata.")) {
+            event_id = $('#event_id').attr('value');
+            $.ajax({
+                url: "/delete_event/?event-id="+event_id,
+                type: "GET",
+                success: function(response) {
+                    alert("Evento cancellato con successo!");
+                    // Redirect a una pagina di conferma o alla lista degli eventi, ad esempio:
+                    window.location.href = "{{ url_for('index') }}";
+                },
+                error: function(xhr, status, error) {
+                    alert("Si è verificato un errore durante la cancellazione dell'evento: " + error);
+                }
+            });
+        }
     }
 
-  </script>
+</script>
 </body>
 
 </html>

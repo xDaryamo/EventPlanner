@@ -54,7 +54,6 @@ def login():
         if user_id:
             # Utente autenticato, salvare le informazioni nella sessione
             session['user'] = user_id
-            print(session['user'])
             # Reindirizza alla pagina iniziale
             return redirect(url_for('index'))
         else:
