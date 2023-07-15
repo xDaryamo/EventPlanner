@@ -1,0 +1,57 @@
+  <head>
+    <meta charset="utf-8">
+    <title>Dynamic Calendar JavaScript | CodingNepal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Google Font Link for Icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.0/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.0/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/details_style.css">
+
+
+  </head>
+
+  <body>
+    {% include './fragments/header.html' %}
+
+    <h1>Dettagli Evento</h1>
+
+    <div class="event-cards">
+      {% for event in events %}
+      <a href="/update-event?event-id={{ event._id }}" class="event-card">
+        <div class="event-content">
+          <h2>{{ event.nome }}</h2>
+          <p>{{ event.categoria }}</p>
+          <p>{{ event.data_inizio }}</p>
+          <p>{{ event.data_fine }}</p>
+          <!-- Aggiungi altri dettagli dell'evento come necessario -->
+        </div>
+        <div class="edit-icon" title="Modifica Evento">✎</div>
+      </a>
+      {% endfor %}
+
+      <a href="/insert-event?day={{ day }}&month={{ month }}&year={{ year }}" class="event-card add-event-icon" title="Crea Evento">
+        <i class="fas fa-plus"></i>
+      </a>
+    </div>
+
+   {% include './fragments/footer.html' %}
+    <script>
+      $(document).ready(function() {
+        $('.event-card').hover(
+          function() {
+            $(this).find('.event-content').css('opacity', '0');
+            $(this).find('.edit-icon').css('opacity', '1');
+          },
+          function() {
+            $(this).find('.event-content').css('opacity', '1');
+            $(this).find('.edit-icon').css('opacity', '0');
+          }
+        );
+      });
+    </script>
+  </body>
+</html>

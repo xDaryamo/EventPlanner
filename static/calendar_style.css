@@ -1,24 +1,30 @@
- /* Import Google font - Poppins */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
-*{
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
-}
+
 body{
   display: flex;
-  align-items: center;
-  padding: 0 10px;
-  justify-content: center;
   min-height: 100vh;
-  background: #9B59B6;
+  background: #999AC6;
 }
-.wrapper{
-  width: 450px;
+.parent-wrapper{
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Aggiunto per centrare anche orizzontalmente */
+  height: 100vh;
+}
+.wrapper {
+  width: 60vw;
+  height: 50vw;
+  min-width: 350px;
+  min-height: 480px;
   background: #fff;
   border-radius: 10px;
   box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  max-width: 1000px;
+  max-height: 750px;
+  margin-top: calc(13vh - 60px);
+
 }
 .wrapper header{
   display: flex;
@@ -53,12 +59,17 @@ header .current-date{
 }
 .calendar{
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+
 }
 .calendar ul{
   display: flex;
   flex-wrap: wrap;
   list-style: none;
   text-align: center;
+  padding-left: 0;
 }
 .calendar .days{
   margin-bottom: 20px;
@@ -66,8 +77,12 @@ header .current-date{
 .calendar li{
   color: #333;
   width: calc(100% / 7);
-  font-size: 1.07rem;
+  font-size: 1.5vw;
 }
+
+
+
+
 .calendar .weeks li{
   font-weight: 500;
   cursor: default;
@@ -76,7 +91,7 @@ header .current-date{
   z-index: 1;
   cursor: pointer;
   position: relative;
-  margin-top: 30px;
+  margin-top: 40px;
 }
 .days li.inactive{
   color: #aaa;
@@ -89,14 +104,14 @@ header .current-date{
   content: "";
   left: 50%;
   top: 50%;
-  height: 40px;
-  width: 40px;
+  height: 50px;
+  width: 50px;
   z-index: -1;
   border-radius: 50%;
   transform: translate(-50%, -50%);
 }
 .days li.active::before{
-  background: #9B59B6;
+  background: #77ba99;
 }
 .days li:not(.active):hover::before{
   background: #f2f2f2;
@@ -111,8 +126,33 @@ header .current-date{
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 10px;
-  height: 3px;
+  width: 15px;
+  height: 4px;
   border-radius: 25px;
-  background-color: #9B59B6;
+  background-color: #77ba99;
+  transition: 0.5s;
 }
+
+
+
+  @media only screen and (max-width: 600px) {
+    .calendar li {
+      font-size: 3vw; /* Imposta la dimensione del font a 3% della larghezza della viewport su smartphone */
+    }
+
+    .days li::before {
+      height: 40px;
+      width: 40px;
+    }
+
+    .event-indicator {
+      width: 10px;
+      height: 3px;
+    }
+
+    .calendar .days li {
+      margin-top: 30px;
+    }
+
+
+  }

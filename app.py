@@ -1,4 +1,5 @@
 import datetime
+import json
 
 from bcrypt import hashpw, gensalt
 from bson import ObjectId
@@ -439,7 +440,6 @@ def delete_expense():
 
     return jsonify({ 'message':'deleted'})
 
-
 @app.route("/delete_activity", methods=['GET'])
 def delete_activity():
     act_id = request.args.get('activity_id')
@@ -450,6 +450,25 @@ def delete_activity():
     activity_model.delete_activity(act_id)
 
     return jsonify({ 'message':'deleted'})
+
+
+@app.route('/event-details', methods=['GET', 'POST'])
+def event_details():
+    if request.method == 'GET':
+        event_ids = request.args.get('event-ids')
+        event_ids_list = json.loads(event_ids)
+        event_ids_list = json.loads(event_ids_list)
+
+        start_day = request.args.get('day')
+        start_month = request.args.get('month')
+        start_year = request.args.get('year')
+
+        events = []
+        for event_id in event_ids_list:
+            events.append(event_model.get_event(event_id))
+
+
+        return render_template('event-details.html', events = events, day=start_day, month=start_month, year=start_year)
 
 if __name__ == '__main__':
     app.run(debug=True)

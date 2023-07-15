@@ -1,3 +1,5 @@
+//====================HOME========================
+
 const daysTag = document.querySelector(".days"),
 currentDate = document.querySelector(".current-date"),
 prevNextIcon = document.querySelectorAll(".icons span");
@@ -114,12 +116,13 @@ function confrontaDate(data1, data2) {
 }
 
 $(document).ready(function() {
+    //=====================HOME========================================
     let mese = convertMonthToNumber($('.current-date').text().split(" ")[0]);
     let anno = $('.current-date').text().split(" ")[1];
     getUserMonthEvents(anno, mese);
     let isSpan
 
-    $(document).on('mouseenter', 'li:not(.inactive):not(.day-of-week)', function() {
+    $(document).on('mouseenter', 'li:not(.inactive):not(.day-of-week):not(.nav-item)', function() {
         let originalText = $(this).text();
         $(this).data('originalText', originalText);
 
@@ -132,7 +135,7 @@ $(document).ready(function() {
             $(this).text('+');
     });
 
-    $(document).on('mouseleave', 'li:not(.inactive):not(.day-of-week)', function() {
+    $(document).on('mouseleave', 'li:not(.inactive):not(.day-of-week):not(.nav-item)', function() {
       let originalText = $(this).data('originalText');
       $(this).text(originalText);
         if(isSpan === true){
@@ -161,11 +164,24 @@ $(document).ready(function() {
                     let giornoNumero = giorno.getDate();
                     let $dayElement = $(".calendar .days li:not(.inactive)").filter(function() {
                         //console.log(event.id);
-                        $(this).attr('event-id', event.id);
                         return $(this).text().trim() === giornoNumero.toString();
                     });
 
-                    $($dayElement).attr('event-id', event._id);
+                    let eventIds = $dayElement.attr('event-ids');
+                    if (eventIds) {
+                        // Converte la stringa in un array
+                        eventIds = JSON.parse(eventIds);
+                        // Aggiunge l'id dell'evento all'array
+                        eventIds.push(event._id);
+                    } else {
+                      // Crea un nuovo array con l'id dell'evento corrente
+                      eventIds = [event._id];
+                    }
+
+                    // Converte l'array in una stringa
+                    eventIds = JSON.stringify(eventIds);
+                    $dayElement.attr('event-ids', eventIds);
+
                     if (!$dayElement.find('.event-indicator').length) {
                         let $eventIndicator = $("<span class='event-indicator'></span>");
                         if ($dayElement.hasClass('active')) {
@@ -208,14 +224,18 @@ $(document).ready(function() {
         let year = $('.current-date').text().split(" ")[1];
 
         if($(this).find('i').length !== 0){
-            url = '/update-event?event-id=' + $(this).attr('event-id');
+            url = '/event-details?event-ids=' + encodeURIComponent(JSON.stringify($(this).attr('event-ids')))+'&day=' + encodeURIComponent(day) + '&month=' + encodeURIComponent(month) + '&year=' + encodeURIComponent(year);
         }
         else {
             url = '/insert-event?day=' + encodeURIComponent(day) + '&month=' + encodeURIComponent(month) + '&year=' + encodeURIComponent(year);
         }
-
-
         window.location.href = url;
-  });
+    });
+
+    //===========================INSERT============================
+
+
+
 
 });
+

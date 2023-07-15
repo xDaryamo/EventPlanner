@@ -1,10 +1,17 @@
-<header>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+<header class="sticky-header">
+  <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container">
+      {% if 'user' in session %}
       <a class="navbar-brand mr-auto" href="/">
         <img src="/static/images/logo.png" alt="Logo" width="40" height="40" class="mr-2">
         EventPlanner
       </a>
+      {% else %}
+      <a class="navbar-brand mr-auto" href="#">
+        <img src="/static/images/logo.png" alt="Logo" width="40" height="40" class="mr-2">
+        EventPlanner
+      </a>
+      {% endif %}
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -12,8 +19,12 @@
         <ul class="navbar-nav">
           {% if 'user' in session %}
             <li class="nav-item">
+              <a class="nav-link" href="/">Eventi</a>
+            </li>
+            <li class="nav-item">
               <a class="nav-link" href="/logout">Logout</a>
             </li>
+
           {% else %}
             <li class="nav-item">
               <a class="nav-link" href="/login">Login</a>
@@ -22,9 +33,7 @@
               <a class="nav-link" href="/register">Registrazione</a>
             </li>
           {% endif %}
-          <li class="nav-item">
-            <a class="nav-link" href="/events">Eventi</a>
-          </li>
+
         </ul>
       </div>
     </div>
