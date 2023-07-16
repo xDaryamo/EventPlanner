@@ -17,8 +17,24 @@ body {
     background-color: #f8f9fa;
     color: #333;
 }
-h1{
-    padding-top: 13vh;
+
+h1 {
+    text-align: center;
+    position: relative;
+    padding-top: 5vh ;
+    margin-top: calc(13vh - 60px);
+    padding-bottom: 1%;
+}
+h1::after {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 2px;
+  background-color: #77ba99;
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 .card {
     width: 50%;

@@ -10,7 +10,7 @@ h1::after {
   display: block;
   width: 40px;
   height: 2px;
-  background-color: #333;
+  background-color: #77ba99;
   position: absolute;
   bottom: -8px;
   left: 50%;
@@ -25,19 +25,21 @@ h1::after {
 }
 
 .event-card {
-    width: 300px;
+    width: 35vh;
     margin: 10px;
-    padding: 10px;
-    border: 1px solid #ccc;
+    padding: 20px;
     border-radius: 10px;
     position: relative;
     overflow: hidden;
     cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* Aggiunge una leggera ombra per una migliore visualizzazione */
+    background-color: #fff; /* Aggiunge un colore di sfondo bianco */
+    transition: 0.5s;
 }
 
 .event-card:hover .event-content {
     opacity: 0;
-    transition: opacity 0.3s;
+    transition: 0.3s;
 }
 
 .event-card .edit-icon {
@@ -47,7 +49,9 @@ h1::after {
     transform: translate(-50%, -50%);
     font-size: 24px;
     opacity: 0;
-    transition: opacity 0.3s;
+    transition: 0.3s;
+    color: white;
+
 }
 
 .event-card:hover .edit-icon {
@@ -90,4 +94,49 @@ a:hover {
 
 .add-event-icon:hover i {
     color: #f0f0f0;
+}
+.event-name {
+    font-size: 2.5vh;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.date{
+    display: flex;
+    justify-content: space-evenly;
+    margin-bottom: 10px;
+}
+
+
+h4 {
+    font-size: 1.8vh;
+    text-align: center;
+}
+
+.category h4 {
+    display: inline-block;
+    margin-bottom: 0;
+    margin-right: 10px;
+}
+
+.category {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.tag-list {
+    display: flex;
+    justify-content: center;
+}
+.label {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  margin-right: 5px;
+  font-size: 12px;
+  color: #fff;
+}
+.tag.label {
+  background-color: #77ba99;
 }

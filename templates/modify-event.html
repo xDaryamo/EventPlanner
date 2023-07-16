@@ -45,7 +45,7 @@
             <input type="hidden" id="budget_id" name="budget_id" value="{{ event.budgetId }}">
 
             <span id="totale_spesa"></span><br>
-            <input type="hidden" id="tot" name="tot" value="{}}">
+            <input type="hidden" id="tot" name="tot" value="">
 
             <label for="spese">Spese:</label>
             <ul id="spese">
@@ -77,8 +77,6 @@
 
 <script>
     function calcolaTotaleSpesa() {
-
-
 
         let totale_spesa = 0;
         $('input[id^="costo"]').each(function() {

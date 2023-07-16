@@ -1,6 +1,6 @@
   <head>
     <meta charset="utf-8">
-    <title>Dynamic Calendar JavaScript | CodingNepal</title>
+    <title>Eventi in data {{ day }}/{{ month }}/{{ year}}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Google Font Link for Icons -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
@@ -23,10 +23,32 @@
       {% for event in events %}
       <a href="/update-event?event-id={{ event._id }}" class="event-card">
         <div class="event-content">
-          <h2>{{ event.nome }}</h2>
-          <p>{{ event.categoria }}</p>
-          <p>{{ event.data_inizio }}</p>
-          <p>{{ event.data_fine }}</p>
+            <h3 class="event-name">{{ event.nome }}</h3>
+            <span class="date">
+                <div class="date-item">
+                    <h4>Data inizio:</h4>
+                    {{ event.data_inizio }}
+                </div>
+                <div class="date-item">
+                    <h4>Data fine:</h4>
+                    {{ event.data_fine }}
+                </div>
+            </span>
+            <span class="category">
+                <h4>Categoria:</h4>
+                {{ event.categoria }}
+            </span>
+            <div class="tags-box">
+                <h4>Tags:</h4>
+                <div class="tag-list">
+
+                    {% for tag in event.tags %}
+                    <p class="tag label">#{{ tag }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+
           <!-- Aggiungi altri dettagli dell'evento come necessario -->
         </div>
         <div class="edit-icon" title="Modifica Evento">✎</div>
@@ -40,18 +62,93 @@
 
    {% include './fragments/footer.html' %}
     <script>
-      $(document).ready(function() {
+    $(document).ready(function() {
         $('.event-card').hover(
-          function() {
-            $(this).find('.event-content').css('opacity', '0');
-            $(this).find('.edit-icon').css('opacity', '1');
-          },
-          function() {
-            $(this).find('.event-content').css('opacity', '1');
-            $(this).find('.edit-icon').css('opacity', '0');
-          }
+            function () {
+                $(this).find('.event-content').css('opacity', '0.1');
+                $(this).find('.edit-icon').css('opacity', '1');
+                $(this).css('background', 'rgba(119, 186, 153, 1)')
+            },
+            function () {
+                $(this).find('.event-content').css('opacity', '1');
+                $(this).find('.edit-icon').css('opacity', '0');
+                $(this).css('background', 'white')
+            }
         );
-      });
+
+        $('.tag-list .tag').each(function() {
+            var tag = $(this);
+            var tagColor = localStorage.getItem(tag.text()); // Controlla se il colore è già stato salvato
+
+            if (tagColor) {
+                // Se il colore è già stato salvato, utilizza quello
+                tag.css('background-color', tagColor);
+            } else {
+                // Altrimenti, genera un colore casuale e salvalo
+                var randomColor = getRandomColor();
+                tag.css('background-color', randomColor);
+                localStorage.setItem(tag.text(), randomColor);
+            }
+
+            // Verifica il contrasto tra il colore di sfondo e il testo
+            var backgroundColor = tag.css('background-color');
+            var color = tag.css('color');
+            var contrastRatio = getContrastRatio(backgroundColor, color);
+
+            // Se il contrasto è basso, cambia il colore del testo
+            if (contrastRatio < 4.5) {
+                tag.css('color', '#fff'); // Imposta il testo su bianco
+            }
+
+        });
+    });
+
+    // Funzione per generare un colore casuale
+    function getRandomColor() {
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+        for (var i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+
+
+    // Funzione per calcolare il rapporto di contrasto tra due colori
+    function getContrastRatio(color1, color2) {
+        var luminance1 = getRelativeLuminance(color1);
+        var luminance2 = getRelativeLuminance(color2);
+        var ratio = (Math.max(luminance1, luminance2) + 0.05) / (Math.min(luminance1, luminance2) + 0.05);
+        return ratio;
+    }
+
+    // Funzione per calcolare la luminosità relativa di un colore
+    function getRelativeLuminance(color) {
+        var hex = color.substring(1); // Rimuove il carattere '#'
+        var rgb = parseInt(hex, 16);
+        var r = (rgb >> 16) & 0xff;
+        var g = (rgb >> 8) & 0xff;
+        var b = rgb & 0xff;
+
+        var sR = r / 255;
+        var sG = g / 255;
+        var sB = b / 255;
+
+        var sRGB = [sR, sG, sB];
+        var lRGB = [];
+
+        for (var i = 0; i < sRGB.length; i++) {
+            if (sRGB[i] <= 0.03928) {
+                lRGB[i] = sRGB[i] / 12.92;
+            } else {
+                lRGB[i] = Math.pow((sRGB[i] + 0.055) / 1.055, 2.4);
+            }
+        }
+
+        var luminance = 0.2126 * lRGB[0] + 0.7152 * lRGB[1] + 0.0722 * lRGB[2];
+        return luminance;
+    }
+
     </script>
   </body>
 </html>

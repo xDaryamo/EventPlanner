@@ -131,7 +131,6 @@ def create_event():
         return render_template('create-event.html', giorno=start_day, mese=start_month, anno=start_year)
 
     if request.method == 'POST':
-
         id_evento = str(ObjectId())
         nome_evento = request.form['nome_evento']
         categoria = request.form['categoria']
@@ -143,11 +142,13 @@ def create_event():
         data_inizio = request.form['data_inizio']
         data_fine = request.form['data_fine']
 
+
         luogo = request.form['luogo']
         informazioni_aggiuntive = request.form['informazioni_aggiuntive']
 
         include_budget = request.form.get('include_budget')
         id_budget = None
+
 
         if include_budget:
             id_budget = str(ObjectId())
