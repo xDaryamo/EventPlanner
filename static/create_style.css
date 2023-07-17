@@ -140,3 +140,7 @@ button[type='button']{
 .error{
   color: red;
 }
+
+.update{
+  margin-left: 20px;
+}

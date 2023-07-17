@@ -1,83 +1,132 @@
-<!DOCTYPE html>
-<html lang="en">
-
 <head>
-    <meta charset="UTF-8">
+    <meta charSet="utf-8">
+    <title>Crea un nuovo evento</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modifica Evento</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/static/style.css">
+    <!-- Google Font Link for Icons -->
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.0/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.0/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/create_style.css">
 </head>
 
 <body>
-<form method="POST" action="{{ url_for('update_event') }}">
-
+{% include './fragments/header.html' %}
+<h1>Modifica evento</h1>
+<form method="POST" action="/update-event" id="event-form">
     <input type="hidden" id="event_id" name="event_id" value="{{ event._id }}">
-    <label for="nome_evento">Nome:</label>
-    <input type="text" id="nome_evento" name="nome_evento" value="{{ event.nome }}" required><br>
+    <label htmlFor="nome_evento">Nome:</label>
+    <input type="text" id="nome_evento" name="nome_evento" required value="{{ event.nome }}"><br>
 
-    <label for="categoria">Categoria:</label>
-    <input type="text" id="categoria" name="categoria" value="{{ event.categoria }}" required><br>
+    <label htmlFor="categoria">Categoria:</label>
+    <select id="categoria" name="categoria" required>
+        <option value="" disabled>Scegli una categoria</option>
+        <option value="Mostra" {% if event.categoria == 'Mostra' %}selected{% endif %}>Mostra</option>
+        <option value="Concerto" {% if event.categoria == 'Concerto' %}selected{% endif %}>Concerto</option>
+        <option value="Festa" {% if event.categoria == 'Festa' %}selected{% endif %}>Festa</option>
+        <option value="Cerimonia" {% if event.categoria == 'Cerimonia' %}selected{% endif %}>Cerimonia</option>
+        <option value="Conferenza" {% if event.categoria == 'Conferenza' %}selected{% endif %}>Conferenza</option>
+    </select>
 
-    <label for="tags">Tags:</label>
-    <input type="text" id="tags" name="tags" value="{{ event.tags }}" required><br>
+    <label htmlFor="tags">Tags:</label>
+    <div id="tag-error" class="error"></div>
+    <input type="text" id="tags" name="tags" required value="{{ event.tags|join(', ') }}"><br>
 
-    <label for="data_inizio">Data inizio:</label>
-    <input type="date" id="data_inizio" name="data_inizio" value="{{ event.data_inizio }}" required><br>
 
-    <label for="data_fine">Data fine:</label>
-    <input type="date" id="data_fine" name="data_fine" value="{{ event.data_fine }}" required><br>
+    <div class="date-block">
+        <label htmlFor="data_inizio">Data inizio:</label>
+        <input type="date" id="data_inizio" name="data_inizio" required value="{{ event.data_inizio }}"><br>
 
-    <label for="luogo">Luogo:</label>
-    <input type="text" id="luogo" name="luogo" value="{{ event.luogo }}" required><br>
+        <label htmlFor="data_fine">Data fine:</label>
+        <input type="date" id="data_fine" name="data_fine" required value="{{ event.data_fine }}"><br>
+    </div>
+    <div id="date-error" class="error"></div>
 
-    <label for="informazioni_aggiuntive">Informazioni aggiuntive:</label><br>
-    <textarea id="informazioni_aggiuntive" name="informazioni_aggiuntive" rows="4" cols="50">{{ event.informazioni_aggiuntive }}</textarea><br>
+
+    <label htmlFor="luogo">Luogo:</label>
+    <input type="text" id="luogo" name="luogo" required value="{{ event.luogo }}"><br>
+
+    <label htmlFor="informazioni_aggiuntive">Informazioni aggiuntive:</label><br>
+    <textarea id="informazioni_aggiuntive" name="informazioni_aggiuntive" rows="4" cols="50" > {{ event.informazioni_aggiuntive }}</textarea><br>
 
     <fieldset>
         <legend>Budget</legend>
         <input type="checkbox" id="include_budget" name="include_budget" {% if event.budgetId %}checked{% endif %}>
-        <label for="include_budget">Includi budget</label><br>
+        <label htmlFor="include_budget">Includi budget</label>
+
 
         <div id="budget_fields" style="display:none;">
             <input type="hidden" id="budget_id" name="budget_id" value="{{ event.budgetId }}">
 
-            <span id="totale_spesa"></span><br>
-            <input type="hidden" id="tot" name="tot" value="">
+            <label htmlFor="totale_spesa">Totale spesa:</label>
+            <span id="totale_spesa_text">€ 0.00</span><br>
+            <input type="hidden" id="totale_spesa" name="totale_spesa">
 
-            <label for="spese">Spese:</label>
+
             <ul id="spese">
+                <li>
+                    <input type= 'hidden', id='spesa_id1', name= 'spesa_id1'>
+                    <label htmlFor="costo1">1) Costo:</label>
+                    <input type="text" id="costo1" name="costo1">
+                    <label htmlFor="descrizione1">1) Descrizione:</label>
+                    <input type="text" id="descrizione1" name="descrizione1">
+                </li>
             </ul>
 
-            <button type="button" onclick="addSpesaField()">Aggiungi spesa</button>
+            <button type="button" id="add-spesa-btn">Aggiungi spesa</button>
         </div>
     </fieldset>
 
     <fieldset>
         <legend>Schedule</legend>
         <input type="checkbox" id="include_schedule" name="include_schedule" {% if event.scheduleId %}checked{% endif %}>
-        <label for="include_schedule">Includi schedule</label><br>
+        <label htmlFor="include_schedule">Includi schedule</label>
+
+
 
         <div id="schedule_fields" style="display:none;">
             <input type="hidden" id="schedule_id" name="schedule_id" value="{{ event.scheduleId }}">
-
+            <div id="time-error" class="error"></div>
             <ul id="attivita">
+                <li>
+                    <input type= 'hidden', id='attivita_id1', name= 'attivita_id1'>
+                    <label htmlFor="actname1">1) Nome:</label>
+                    <input type="text" id="actname1" name="actname1">
+                    <div class="orario">
+                        <label htmlFor="orario_inizio1">Orario inizio:</label>
+                        <input type="text" id="orario_inizio1" name="orario_inizio1", pattern= '^([01]?[0-9]|2[0-3]):[0-5][0-9]$', title='Inserisci un orario nel formato HH:mm'>
+                        <label htmlFor="orario_fine1">Orario fine:</label>
+                        <input type="text" id="orario_fine1" name="orario_fine1", pattern= '^([01]?[0-9]|2[0-3]):[0-5][0-9]$', title='Inserisci un orario nel formato HH:mm'>
+                    </div>
+                </li>
             </ul>
 
-            <button type="button" onclick="addAttivitaField()">Aggiungi attività</button>
+            <button type="button" id="add-attivita-btn">Aggiungi attività</button>
         </div>
     </fieldset>
 
-    <button type="button" onclick="deleteEvent()">Cancella Evento</button>
+    <div class="submit">
+        <button type="button" onclick="deleteEvent()">Cancella Evento</button>
+        <input type="submit" value="Aggiorna Evento" class="update" id="submitBtn">
+    </div>
 
-    <input type="submit" value="Aggiorna Evento">
 </form>
+</body>
+
 
 <script>
-    function calcolaTotaleSpesa() {
+    var hasBudget = true;
+    var hasSchedule = true;
 
+    function validateTimeFormat(time) {
+      var regex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+      return regex.test(time);
+    }
+
+    function calcolaTotaleSpesa() {
         let totale_spesa = 0;
         $('input[id^="costo"]').each(function() {
             var valore = parseFloat($(this).val());
@@ -85,296 +134,309 @@
                 totale_spesa += valore;
             }
         });
-        $('#tot').val(totale_spesa);
-        $('#totale_spesa').text('Totale spesa: ' + totale_spesa);
-
-        $('input[id^="costo"]').on('input', function() {
-            let totale_spesa = 0;
-            $('input[id^="costo"]').each(function() {
-                var valore = parseFloat($(this).val());
-                if (!isNaN(valore)) {
-                    totale_spesa += valore;
-                }
-            });
-            $('#tot').val(totale_spesa);
-            $('#totale_spesa').text('Totale spesa: ' + totale_spesa);
-        });
-
-
+        $('#totale_spesa_text').text('€ ' + totale_spesa.toFixed(2));
+        $('#totale_spesa').val(totale_spesa);
 
     }
 
-    $(document).ready(function (){
-        function handleIncludeBudgetChange() {
-            let isBudgetIncluded = $('#include_budget').is(':checked');
-            if (isBudgetIncluded) {
-                let budget_id = $('#budget_id').val();
+    function handleIncludeBudgetChange() {
+        let isBudgetIncluded = $('#include_budget').is(':checked');
+
+        if (isBudgetIncluded) {
+            let budget_id = $('#budget_id').val();
+            if(hasBudget)
                 getBudgetDetails(budget_id);
-                $('#budget_fields').show();
-            } else {
-                $('#budget_fields').hide();
-            }
+            // Add 'required' attribute to inputs
+            $('input[id^="costo"]').attr('required', true);
+            $('input[id^="descrizione"]').attr('required', true);
+            $('#budget_fields').show();
+        } else {
+            $('input[id^="costo"]').removeAttr('required');
+            $('input[id^="descrizione"]').removeAttr('required');
+            $('#budget_fields').hide();
         }
-        // Rileva il cambiamento iniziale dello stato della checkbox
-        handleIncludeBudgetChange();
+        console.log('rilevato')
+    }
 
-        // Rileva i cambiamenti futuri dello stato della checkbox
-        $('#include_budget').change(function() {
-            handleIncludeBudgetChange();
-        });
+    function handleIncludeScheduleChange() {
+        let isScheduleIncluded = $('#include_schedule').is(':checked');
 
-    });
-
-    $(document).ready(function (){
-        function handleIncludeScheduleChange() {
-            let isScheduleIncluded = $('#include_schedule').is(':checked');
-            if (isScheduleIncluded) {
-                let schedule_id = $('#schedule_id').val();
+        if (isScheduleIncluded) {
+            let schedule_id = $('#schedule_id').val();
+            if(hasSchedule)
                 getScheduleDetails(schedule_id);
-                $('#schedule_fields').show();
-            } else {
-                $('#schedule_fields').hide();
-            }
+            $('input[id^="actname"]').attr('required', true);
+            $('input[id^="orario"]').attr('required', true);
+            $('#schedule_fields').show();
+        } else {
+            $('input[id^="actname"]').removeAttr('required');
+            $('input[id^="orario"]').removeAttr('required');
+            $('#schedule_fields').hide();
         }
-        // Rileva il cambiamento iniziale dello stato della checkbox
-        handleIncludeScheduleChange();
-
-        // Rileva i cambiamenti futuri dello stato della checkbox
-        $('#include_schedule').change(function() {
-            handleIncludeScheduleChange();
-        });
-
-    });
-
+    }
     function getBudgetDetails(budgetId) {
+        if(hasBudget) {
+            $.ajax({
+                url: "/get_budget?budget-id=" + budgetId,
+                type: 'GET',
+                success: function(response) {
 
-        $.ajax({
-            url: "/get_budget?budget-id=" + budgetId,
-            type: 'GET',
-            success: function(response) {
-                // Esegui le operazioni necessarie con i dettagli del budget restituiti dal server
-                //console.log(response); // Esempio: visualizza i dettagli del budget nella console
+                    if (!response) {
+                        hasBudget = false;
+                        return;
 
-                // Mostra le spese nel front-end
-                var expenses = response.spese;
-                $('#spese').empty(); // Rimuovi eventuali spese precedenti
+                    }
+                    // Mostra le spese nel front-end
+                    var expenses = response.spese;
+                    $('#spese').empty(); // Rimuovi eventuali spese precedenti
 
-                let totale_spesa = response.totale_spendere
-                $('#tot').val(totale_spesa);
-                $('#totale_spesa').text('Totale spesa: ' + totale_spesa);
-                expenses.forEach(function(spesa, index) {
-                    var spesaId = spesa._id;
+                    let totale_spesa = parseFloat(response.totale_spendere);
+                    $('#totale_spesa').val(totale_spesa);
+                    $('#totale_spesa_text').text('€ ' + totale_spesa.toFixed(2));
 
-                    var costo = spesa.costo;
-                    var descrizione = spesa.descrizione;
+                    expenses.forEach(function(spesa, index) {
+                        index+=1
+                        var spesaId = spesa._id;
+                        var costo = spesa.costo;
+                        var descrizione = spesa.descrizione;
 
-                    var listItem = $('<li>');
-                    listItem.append($('<input>', { type: 'hidden', id: 'spesa_id' + index, name: 'spesa_id' + index, value: spesaId }));
-                    listItem.append($('<label>', { for: 'costo' + index, text: 'Costo:' }));
-                    listItem.append($('<input>', { type: 'text', id: 'costo' + index, name: 'costo' + index, value: costo }));
-                    listItem.append($('<label>', { for: 'descrizione' + index, text: 'Descrizione:' }));
-                    listItem.append($('<input>', { type: 'text', id: 'descrizione' + index, name: 'descrizione' + index, value: descrizione }));
-                    listItem.append($('<button>', { type: 'button', id: 'removeSpesa' + index, text: 'Rimuovi', onclick: 'removeSpesaField(this)', spesa_id: spesaId }));
+                        var listItem = $('<li>');
+                        listItem.append($('<input>', { type: 'hidden', id: 'spesa_id' + index, name: 'spesa_id' + index, value: spesaId }));
+                        listItem.append($('<label>', { for: 'costo' + index, text: index + ') Costo:' }));
+                        listItem.append($('<input>', { type: 'text', id: 'costo' + index, name: 'costo' + index, value: costo }));
+                        listItem.append($('<label>', { for: 'descrizione' + index, text: index + ') Descrizione:' }));
+                        listItem.append($('<input>', { type: 'text', id: 'descrizione' + index, name: 'descrizione' + index, value: descrizione }));
+                        listItem.append($('<button>', { type: 'button', id: 'removeSpesa' + index, text: 'Rimuovi', class: "remove-field-btn", spesa_id: spesaId }));
 
-                    $('#spese').append(listItem);
-                });
-            },
-            error: function(error) {
-                console.error(error); // Gestisci gli errori in caso di problemi con la richiesta AJAX
-            }
-        });
-
-        calcolaTotaleSpesa();
+                        $('#spese').append(listItem);
+                        hasBudget = false;
+                    });
+                },
+                error: function(error) {
+                    console.error(error); // Gestisci gli errori in caso di problemi con la richiesta AJAX
+                }
+            });
+            calcolaTotaleSpesa();
+        }
 
     }
 
     function getScheduleDetails(scheduleId) {
-        $.ajax({
-            url: "/get_schedule?schedule-id=" + scheduleId,
-            type: 'GET',
-            success: function(response) {
-                // Esegui le operazioni necessarie con i dettagli dello schedule restituiti dal server
-                //console.log(response); // Esempio: visualizza i dettagli del budget nella console
+        if(hasSchedule) {
+            $.ajax({
+                url: "/get_schedule?schedule-id=" + scheduleId,
+                type: 'GET',
+                success: function(response) {
+                    if (!response) {
+                        hasSchedule = false;
+                        return;
+                    }
+                    console.log('eccoci qua')
+                    // Mostra le attività nel front-end
+                    var activities = response.activities;
+                    $('#attivita').empty(); // Rimuovi eventuali attività precedenti
 
-                // Mostra le attivita nel front-end
-                var acts = response.activities;
-                $('#attivita').empty(); // Rimuovi eventuali attivita precedenti
+                    activities.forEach(function(attivita, index) {
+                        var attivitaId = attivita._id;
+                        var nome = attivita.nome;
+                        var orarioInizio = attivita.orario_inizio;
+                        var orarioFine = attivita.orario_fine;
 
-                acts.forEach(function(act, index) {
-                    var actId = act._id;
-                    var nome = act.nome;
-                    var orario_inizio = act.orario_inizio;
-                    var orario_fine = act.orario_fine;
-                    var listItem = $('<li>');
-                    listItem.append($('<input>', { type: 'hidden', id: 'act_id' + index, name: 'act_id' + index, value: actId }));
-                    listItem.append($('<label>', { for: 'actname' + index, text: 'Nome:' }));
-                    listItem.append($('<input>', { type: 'text', id: 'actname' + index, name: 'actname' + index, value: nome }));
-                    listItem.append($('<label>', { for: 'orario_inizio' + index, text: 'Orario Inizio:' }));
-                    listItem.append($('<input>', { type: 'text', id: 'orario_inizio' + index, name: 'orario_inizio' + index, value: orario_inizio }));
-                    listItem.append($('<label>', { for: 'orario_fine' + index, text: 'Orario Fine:' }));
-                    listItem.append($('<input>', { type: 'text', id: 'orario_fine' + index, name: 'orario_fine' + index, value: orario_fine }));
-                    listItem.append($('<button>', { type: 'button', id: 'removeAct', text: 'Rimuovi', onclick: 'removeAttivitaField(this)', activity_id: actId}));
+                        var div = $('<div>', {
+                            'class': 'orario'
+                        });
+                        var listItem = $('<li>');
+                        listItem.append($('<input>', { type: 'hidden', id: 'attivita_id' + index, name: 'attivita_id' + index, value: attivitaId }));
+                        listItem.append($('<label>', { for: 'actname' + index, text: 'Nome:' }));
+                        listItem.append($('<input>', { type: 'text', id: 'actname' + index, name: 'actname' + index, value: nome }));
+                        div.append($('<label>', { for: 'orario_inizio' + index, text: 'Orario inizio:' }));
+                        div.append($('<input>', { type: 'text', id: 'orario_inizio' + index, name: 'orario_inizio' + index, value: orarioInizio }));
+                        div.append($('<label>', { for: 'orario_fine' + index, text: 'Orario fine:' }));
+                        div.append($('<input>', { type: 'text', id: 'orario_fine' + index, name: 'orario_fine' + index, value: orarioFine }));
+                        div.append($('<button>', { type: 'button', id: 'removeAct' + index, text: 'Rimuovi', activity_id: attivitaId, class: 'remove-field-btn'}));
+                        listItem.append(div)
+                        $('#attivita').append(listItem);
+                        hasSchedule = false;
+                    });
+                },
+                error: function(error) {
+                    console.error(error); // Gestisci gli errori in caso di problemi con la richiesta AJAX
+                }
+            });
+        }
 
-                    $('#attivita').append(listItem);
-                });
-            },
-            error: function(error) {
-                console.error(error); // Gestisci gli errori in caso di problemi con la richiesta AJAX
-            }
-        });
     }
 
     function addSpesaField() {
-        var speseList = document.getElementById("spese");
-        var spesaIndex = speseList.getElementsByTagName("li").length + 1;
+        var speseList = $('#spese');
+        var spesaIndex = speseList.find('li').length + 1;
 
-        var li = document.createElement("li");
+        var li = $('<li>');
 
-        var idInput = document.createElement("input");
-        idInput.setAttribute("type", "hidden");
-        idInput.setAttribute("id", "spesa_id" + spesaIndex);
-        idInput.setAttribute("name", "spesa_id" + spesaIndex);
-        li.appendChild(idInput);
+        var idInput = $('<input>', { type: 'hidden', id: 'spesa_id' + spesaIndex, name: 'spesa_id' + spesaIndex });
+        li.append(idInput);
 
-        var costoLabel = document.createElement("label");
-        costoLabel.setAttribute("for", "costo" + spesaIndex);
-        costoLabel.textContent = "Costo:";
-        li.appendChild(costoLabel);
+        var costoLabel = $('<label>', { for: 'costo' + spesaIndex, text: spesaIndex + ') Costo:' });
+        li.append(costoLabel);
 
-        var costoInput = document.createElement("input");
-        costoInput.setAttribute("type", "text");
-        costoInput.setAttribute("id", "costo" + spesaIndex);
-        costoInput.setAttribute("name", "costo" + spesaIndex);
-        li.appendChild(costoInput);
+        var costoInput = $('<input>', { type: 'text', id: 'costo' + spesaIndex, name: 'costo' + spesaIndex });
+        li.append(costoInput);
 
-        var descrizioneLabel = document.createElement("label");
-        descrizioneLabel.setAttribute("for", "descrizione" + spesaIndex);
-        descrizioneLabel.textContent = "Descrizione:";
-        li.appendChild(descrizioneLabel);
+        var descrizioneLabel = $('<label>', { for: 'descrizione' + spesaIndex, text: spesaIndex + ') Descrizione:' });
+        li.append(descrizioneLabel);
 
-        var descrizioneInput = document.createElement("input");
-        descrizioneInput.setAttribute("type", "text");
-        descrizioneInput.setAttribute("id", "descrizione" + spesaIndex);
-        descrizioneInput.setAttribute("name", "descrizione" + spesaIndex);
-        li.appendChild(descrizioneInput);
+        var descrizioneInput = $('<input>', { type: 'text', id: 'descrizione' + spesaIndex, name: 'descrizione' + spesaIndex });
+        li.append(descrizioneInput);
 
-        var removeButton = document.createElement("button");
-        removeButton.setAttribute("type", "button");
-        removeButton.setAttribute("id", 'removeSpesa' + spesaIndex);
-        removeButton.setAttribute("onclick", "removeSpesaField(this)");
-        removeButton.textContent = "Rimuovi";
-        li.appendChild(removeButton);
+        var removeButton = $('<button>', { type: 'button', id: 'removeSpesa' + spesaIndex, text: 'Rimuovi', class : 'remove-field-btn' });
+        li.append(removeButton);
 
-        speseList.appendChild(li);
+        speseList.append(li);
 
         calcolaTotaleSpesa();
-
+        handleIncludeBudgetChange();
     }
 
     function addAttivitaField() {
-        var attivitaList = document.getElementById("attivita");
-        var attivitaIndex = attivitaList.getElementsByTagName("li").length + 1;
+        var attivitaList = $('#attivita');
+        var attivitaIndex = attivitaList.find('li').length + 1;
 
-        var li = document.createElement("li");
+        var li = $('<li>');
 
-        var idInput = document.createElement("input");
-        idInput.setAttribute("type", "hidden");
-        idInput.setAttribute("id", "attivita_id" + attivitaIndex);
-        idInput.setAttribute("name", "attivita_id" + attivitaIndex);
-        li.appendChild(idInput);
+        var div = $('<div>', {
+        'class': 'orario'
+        });
 
-        var nomeLabel = document.createElement("label");
-        nomeLabel.setAttribute("for", "nome" + attivitaIndex);
-        nomeLabel.textContent = "Nome:";
-        li.appendChild(nomeLabel);
+        var idInput = $('<input>', { type: 'hidden', id: 'attivita_id' + attivitaIndex, name: 'attivita_id' + attivitaIndex });
+        li.append(idInput);
 
-        var nomeInput = document.createElement("input");
-        nomeInput.setAttribute("type", "text");
-        nomeInput.setAttribute("id", "nome" + attivitaIndex);
-        nomeInput.setAttribute("name", "nome" + attivitaIndex);
-        li.appendChild(nomeInput);
+        var nomeLabel = $('<label>', { for: 'actname' + attivitaIndex, text: 'Nome:' });
+        li.append(nomeLabel);
 
-        var orarioInizioLabel = document.createElement("label");
-        orarioInizioLabel.setAttribute("for", "orario_inizio" + attivitaIndex);
-        orarioInizioLabel.textContent = "Orario inizio:";
-        li.appendChild(orarioInizioLabel);
+        var nomeInput = $('<input>', { type: 'text', id: 'actname' + attivitaIndex, name: 'actname' + attivitaIndex });
+        li.append(nomeInput);
 
-        var orarioInizioInput = document.createElement("input");
-        orarioInizioInput.setAttribute("type", "text");
-        orarioInizioInput.setAttribute("id", "orario_inizio" + attivitaIndex);
-        orarioInizioInput.setAttribute("name", "orario_inizio" + attivitaIndex);
-        li.appendChild(orarioInizioInput);
+        var orarioInizioLabel = $('<label>', { for: 'orario_inizio' + attivitaIndex, text: 'Orario inizio:' });
+        div.append(orarioInizioLabel);
 
-        var orarioFineLabel = document.createElement("label");
-        orarioFineLabel.setAttribute("for", "orario_fine" + attivitaIndex);
-        orarioFineLabel.textContent = "Orario fine:";
-        li.appendChild(orarioFineLabel);
+        var orarioInizioInput = $('<input>', { type: 'text', id: 'orario_inizio' + attivitaIndex, name: 'orario_inizio' + attivitaIndex });
+        div.append(orarioInizioInput);
 
-        var orarioFineInput = document.createElement("input");
-        orarioFineInput.setAttribute("type", "text");
-        orarioFineInput.setAttribute("id", "orario_fine" + attivitaIndex);
-        orarioFineInput.setAttribute("name", "orario_fine" + attivitaIndex);
-        li.appendChild(orarioFineInput);
+        var orarioFineLabel = $('<label>', { for: 'orario_fine' + attivitaIndex, text: 'Orario fine:' });
+        div.append(orarioFineLabel);
 
-        var removeButton = document.createElement("button");
-        removeButton.setAttribute("type", "button");
-        removeButton.setAttribute("onclick", "removeAttivitaField(this)");
-        removeButton.textContent = "Rimuovi";
-        li.appendChild(removeButton);
+        var orarioFineInput = $('<input>', { type: 'text', id: 'orario_fine' + attivitaIndex, name: 'orario_fine' + attivitaIndex });
+        div.append(orarioFineInput);
 
-        attivitaList.appendChild(li);
+        var removeButton = $('<button>', { type: 'button', id: 'removeAct' + attivitaIndex, text: 'Rimuovi' , class: 'remove-field-btn'});
+        div.append(removeButton);
+        li.append(div);
+        attivitaList.append(li);
+        handleIncludeScheduleChange();
     }
 
     function removeSpesaField(button) {
-        var li = button.parentNode;
-        var ul = li.parentNode;
-        ul.removeChild(li);
+        var li = $(button).parent();
+        var ul = li.parent();
+        li.detach();
 
-        button_id = $(button).attr('id');
-        id_spesa = $('#'+button_id).attr('spesa_id')
-        budget_id = $('#budget_id').val();
-        $.ajax({
-            url: "/delete_expense?expense_id="+id_spesa + "&budget_id=" + budget_id,
-            type: "GET",
-            success: function(response) {
-                //alert("Spesa cancellata con successo!");
-                console.log('spesa rimossa')
-                calcolaTotaleSpesa();
+        var id_spesa = $(button).attr('spesa_id');
+        var budget_id = $('#budget_id').val();
 
-            },
-            error: function(xhr, status, error) {
-                alert("Si è verificato un errore durante la cancellazione della spesa: " + error);
+        if (id_spesa) {
+            var confirmDelete = confirm("Sei sicuro di voler cancellare questa spesa?");
+            if (confirmDelete) {
+                $.ajax({
+                    url: "/delete_expense?expense_id=" + id_spesa + "&budget_id=" + budget_id,
+                    type: "GET",
+                    success: function(response) {
+                        console.log('spesa rimossa');
+                        calcolaTotaleSpesa();
+                        if (ul.children().length === 0) {
+                            var listItem = $('<li>');
+                            listItem.append($('<input>', { type: 'hidden', id: 'spesa_id1', name: 'spesa_id1' }));
+                            listItem.append($('<label>', { for: 'costo1' , text: '1) Costo:' }));
+                            listItem.append($('<input>', { type: 'text', id: 'costo1', name: 'costo1'}));
+                            listItem.append($('<label>', { for: 'descrizione1' , text:'1) Descrizione:' }));
+                            listItem.append($('<input>', { type: 'text', id: 'descrizione1', name: 'descrizione1' }));
+                            $('#spese').append(listItem);
+                            handleIncludeBudgetChange();
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert("Si è verificato un errore durante la cancellazione della spesa: " + error);
+                    }
+                });
+
+            } else {
+                ul.append(li); // Ripristina l'elemento li nel suo genitore ul
             }
-        });
+        } else {
+            console.log('no ajax');
+        }
+        calcolaTotaleSpesa();
 
 
     }
 
     function removeAttivitaField(button) {
-        var li = button.parentNode;
-        var ul = li.parentNode;
-        ul.removeChild(li);
+        var li = $(button).parent().parent();
+        var ul = li.parent();
+        li.detach();
 
-        button_id = $(button).attr('id');
-        activity_id = $('#'+button_id).attr('activity_id');
-        schedule_id = $('#schedule_id').val();
-        $.ajax({
-            url: "/delete_activity?activity_id="+activity_id+"&schedule_id="+schedule_id,
-            type: "GET",
-            success: function(response) {
-                console.log('cancellato');
-            },
-            error: function(xhr, status, error) {
-                alert("Si è verificato un errore durante la cancellazione dell' attivita: " + error);
+        var button_id = $(button).attr('id');
+        var activity_id = $(button).attr('activity_id');
+        var schedule_id = $('#schedule_id').val();
+        if(activity_id) {
+            var confirmDelete = confirm("Sei sicuro di voler cancellare questa spesa?");
+            if (confirmDelete) {
+                $.ajax({
+                    url: "/delete_activity?activity_id=" + activity_id + "&schedule_id=" + schedule_id,
+                    type: "GET",
+                    success: function(response) {
+                        if (ul.children().length === 0) {
+                            var li = $('<li>');
+                            var div = $('<div>', {
+                                'class': 'orario'
+                            });
+                            var idInput = $('<input>', { type: 'hidden', id: 'attivita_id1', name: 'attivita_id1'});
+                            li.append(idInput);
+                            var nomeLabel = $('<label>', { for: 'actname1', text: 'Nome:' });
+                            li.append(nomeLabel);
+                            var nomeInput = $('<input>', { type: 'text', id: 'actname1', name: 'actname1' });
+                            li.append(nomeInput);
+                            var orarioInizioLabel = $('<label>', { for: 'orario_inizio1', text: 'Orario inizio:' });
+                            div.append(orarioInizioLabel);
+                            var orarioInizioInput = $('<input>', { type: 'text', id: 'orario_inizio1', name: 'orario_inizio1' });
+                            div.append(orarioInizioInput);
+                            var orarioFineLabel = $('<label>', { for: 'orario_fine1', text: 'Orario fine:' });
+                            div.append(orarioFineLabel);
+                            var orarioFineInput = $('<input>', { type: 'text', id: 'orario_fine1', name: 'orario_fine1'});
+                            div.append(orarioFineInput);
+                            li.append(div);
+                            $('#attivita').append(li);
+                            handleIncludeScheduleChange();
+                        }
+                        console.log('cancellato');
+                    },
+                    error: function(xhr, status, error) {
+                        alert("Si è verificato un errore durante la cancellazione dell' attivita: " + error);
+                    }
+                });
+            } else {
+                ul.append(li); // Ripristina l'elemento li nel suo genitore ul
             }
-        });
+        } else {
+            console.log('no ajax');
+        }
+
     }
 
     function deleteEvent() {
         if (confirm("Sei sicuro di voler cancellare l'evento? Questa azione non può essere annullata.")) {
             event_id = $('#event_id').attr('value');
             $.ajax({
-                url: "/delete_event/?event-id="+event_id,
+                url: "/delete_event/?event-id=" + event_id,
                 type: "GET",
                 success: function(response) {
                     alert("Evento cancellato con successo!");
@@ -388,10 +450,114 @@
         }
     }
 
+
+    $(document).ready(function (){
+        // Rileva il cambiamento iniziale dello stato della checkbox
+        handleIncludeBudgetChange();
+        handleIncludeScheduleChange();
+
+        // Rileva i cambiamenti futuri dello stato della checkbox
+        $('#include_budget').change(function() {
+            handleIncludeBudgetChange();
+        });
+
+        $('#include_schedule').change(function() {
+            handleIncludeScheduleChange();
+        });
+
+
+        $('#add-spesa-btn').click(function () {
+            addSpesaField()
+        });
+
+       $('#add-attivita-btn').click(function () {
+            addAttivitaField()
+        });
+
+        $(document).on('input', 'input[id^="costo"]', function () {
+            calcolaTotaleSpesa();
+        });
+
+        $(document).on('click', '.remove-field-btn', function () {
+            var button = $(this);
+            var elementId = $(this).attr('id');
+
+            if (elementId.startsWith('removeSpesa')) {
+                removeSpesaField(button);
+            } else {
+                removeAttivitaField(button);
+            }
+
+        });
+
+        $('#submitBtn').click(function() {
+            var tagsInput = $('#tags').val().trim();
+            var regex = /^[a-zA-Z0-9]+(( )*,( )*[a-zA-Z0-9]+)*$/;
+
+            // Verifica se l'input dei tag corrisponde al formato corretto utilizzando una regex
+            if (!regex.test(tagsInput)) {
+                $('#tag-error').text('Inserisci i tag separati da virgola (caratteri alfanumerici).');
+                return false;
+            } else {
+                var tagsArray = tagsInput.split(','); // Dividi il valore degli input in un array di tag separati dalla virgola
+                var uniqueTags = []; // Array per memorizzare i tag unici
+
+                // Verifica se ci sono tag duplicati
+                for (var i = 0; i < tagsArray.length; i++) {
+                  var tag = tagsArray[i].trim();
+                  if (uniqueTags.indexOf(tag) === -1) {
+                    uniqueTags.push(tag); // Aggiungi il tag all'array se non è duplicato
+                  } else {
+                    $('#tag-error').text('I tag non possono contenere duplicati.');
+                    return false; // Ferma l'invio del form se sono presenti tag duplicati
+                  }
+                }
+
+                $('#tag-error').text(''); // Rimuovi il messaggio di errore se i tag sono stati inseriti correttamente
+            }
+
+            var dataInizio = new Date($('#data_inizio').val());
+            var dataFine = new Date($('#data_fine').val());
+
+            // Verifica se la data di fine è minore della data di inizio
+            if (dataFine < dataInizio) {
+                $('#date-error').text('La data di fine deve essere maggiore o uguale alla data di inizio.');
+                return false; // Ferma l'invio del form
+            }
+
+            $('#date-error').text('');
+
+            var validTimes = true;
+            console.log($('#include_schedule').is(':checked'))
+            if ($('#include_schedule').is(':checked')) {
+
+                $('input[id^="orario_inizio"]').each(function () {
+                    var startTime = $(this).val();
+                    var index = $(this).attr('id').replace('orario_inizio', '');
+                    var endTime = $('#orario_fine' + index).val();
+
+                    if (!validateTimeFormat(startTime) || !validateTimeFormat(endTime)) {
+                        $('#time-error').text('Inserisci gli orari nel formato HH:mm.');
+                        validTimes = false;
+                        return false; // Esci dal ciclo each
+                    }
+                });
+            }
+
+            if (!validTimes) {
+                return false; // Ferma l'invio del form
+            }
+
+            $('#time-error').text('');
+
+        });
+
+    });
+
+
+
+
+
+
 </script>
-</body>
-
 </html>
-
-
-

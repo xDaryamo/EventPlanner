@@ -37,5 +37,13 @@ class Schedule:
             {'_id': schedule_id},
             {'$pull': {'activities': activity_id}}
         )
-        return result.modified_count > 0
 
+        if result.modified_count > 0:
+            from models.events import Event
+            schedule = self.get_schedule(schedule_id)
+            if not schedule['activities']:
+                event_model = Event()
+                event_model.remove_schedule_from_event(schedule_id)
+                self.delete_schedule(schedule_id)
+
+        return result.modified_count > 0

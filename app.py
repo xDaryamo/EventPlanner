@@ -142,13 +142,11 @@ def create_event():
         data_inizio = request.form['data_inizio']
         data_fine = request.form['data_fine']
 
-
         luogo = request.form['luogo']
         informazioni_aggiuntive = request.form['informazioni_aggiuntive']
 
         include_budget = request.form.get('include_budget')
         id_budget = None
-
 
         if include_budget:
             id_budget = str(ObjectId())
@@ -171,7 +169,7 @@ def create_event():
             budget_item = {
                 "_id": id_budget,
                 "id_evento": id_evento,
-                'totale_spesa': totale_spesa,
+                'totale_spendere': totale_spesa,
                 'spese': spese
             }
 
@@ -185,8 +183,8 @@ def create_event():
             attivita = []
 
             for key, value in request.form.items():
-                if key.startswith('nome') and value:
-                    activitiy_num = key.replace('nome', '')
+                if key.startswith('actname') and value:
+                    activitiy_num = key.replace('actname', '')
                     orario_inizio = request.form.get(f'orario_inizio{activitiy_num}')
                     orario_fine = request.form.get(f'orario_fine{activitiy_num}')
                     activity = {
@@ -243,14 +241,17 @@ def update_event():
         event_id = request.form['event_id']
         event_retrieved = event_model.get_event(event_id)
 
+        tags = request.form['tags']
+        tags_list = [tag.strip() for tag in tags.split(',')]
+
         event_data = {
             'nome': request.form['nome_evento'],
             'categoria': request.form['categoria'],
-            'tags': request.form['tags'],
+            'tags': tags_list,
             'data_inizio': request.form['data_inizio'],
             'data_fine': request.form['data_fine'],
             'luogo': request.form['luogo'],
-            'informazioni_aggiuntive': request.form['informazioni_aggiuntive'],
+            'informazioni_aggiuntive': request.form['informazioni_aggiuntive'].strip(),
         }
 
         totale_spesa = 0
@@ -262,10 +263,9 @@ def update_event():
             budget_data = {
                 '_id': None,
                 'id_evento': event_id,
-                'totale_spendere': request.form['tot'],
+                'totale_spendere': request.form['totale_spesa'],
                 'spese': None
             }
-
             if event_retrieved['budgetId']:
                 id_budget = request.form['budget_id']
             else:
@@ -286,7 +286,6 @@ def update_event():
                         'costo': value,
                         'descrizione': descrizione
                     }
-
                     id_spesa = request.form[f'spesa_id{spesa_num}']
 
                     if not id_spesa:
@@ -308,6 +307,15 @@ def update_event():
                 budget_model.create_budget(budget_data)
 
             event_data['budgetId'] = budget_data['_id']
+
+        elif event_retrieved['budgetId'] and 'include_budget' not in request.form:
+            for key, value in request.form.items():
+                if key.startswith('costo') and value:
+                    spesa_num = key.replace('costo', '')
+
+                    id_spesa = request.form[f'spesa_id{spesa_num}']
+                    if id_spesa:
+                        budget_model.remove_expense(event_retrieved['budgetId'], id_spesa)
 
         if 'include_schedule' in request.form:
 
@@ -343,8 +351,8 @@ def update_event():
                         'orario_fine': orario_fine
                     }
 
-                    id_attivita = request.form[f'act_id{num_attivita}']
-
+                    id_attivita = request.form[f'attivita_id{num_attivita}']
+                    print(id_attivita)
                     if not id_attivita:
                         act['_id'] = str(ObjectId())
                         activity_model.create_activity(act)
@@ -364,6 +372,15 @@ def update_event():
                 schedule_model.create_schedule(schedule_data)
 
             event_data['scheduleId'] = schedule_data['_id']
+
+        elif event_retrieved['scheduleId'] and 'include_schedule' not in request.form:
+            for key, value in request.form.items():
+                if key.startswith('actname') and value:
+                    act_num = key.replace('actname', '')
+                    print(act_num)
+                    id_attivita = request.form[f'attivita_id{act_num}']
+                    if id_attivita:
+                        schedule_model.remove_activity(event_retrieved['scheduleId'], id_attivita)
 
         event_model.update_event(event_id, event_data)
         return redirect(url_for('index'))
@@ -399,17 +416,21 @@ def get_budget():
     budget_retrieved = budget_model.get_budget(budget_id)
 
     spese = []
-    for spesa in budget_retrieved['spese']:
-        spese.append(expense_model.get_expense(spesa))
+    if budget_retrieved:
+        for spesa in budget_retrieved['spese']:
+            spese.append(expense_model.get_expense(spesa))
 
-    budget = {
-        '_id': budget_retrieved['_id'],
-        'id_evento': budget_retrieved['id_evento'],
-        'totale_spendere': budget_retrieved['totale_spendere'],
-        'spese': spese
-    }
+        budget = {
+            '_id': budget_retrieved['_id'],
+            'id_evento': budget_retrieved['id_evento'],
+            'totale_spendere': budget_retrieved['totale_spendere'],
+            'spese': spese
+        }
 
-    return jsonify(budget)
+        return jsonify(budget)
+    else:
+        return jsonify(None)
+
 
 @app.route("/get_schedule", methods=['GET'])
 def get_schedule():
@@ -417,17 +438,19 @@ def get_schedule():
     schedule_retrieved = schedule_model.get_schedule(schedule_id)
 
     attivita = []
-    for act in schedule_retrieved['activities']:
-        attivita.append(activity_model.get_activity(act))
+    if schedule_retrieved:
+        for act in schedule_retrieved['activities']:
+            attivita.append(activity_model.get_activity(act))
 
+        schedule = {
+            '_id': schedule_retrieved['_id'],
+            'id_evento': schedule_retrieved['id_evento'],
+            'activities': attivita
+        }
+        return jsonify(schedule)
+    else:
+        return jsonify(None)
 
-    schedule = {
-        '_id': schedule_retrieved['_id'],
-        'id_evento': schedule_retrieved['id_evento'],
-        'activities': attivita
-    }
-
-    return jsonify(schedule)
 
 @app.route("/delete_expense", methods=['GET'])
 def delete_expense():
@@ -435,11 +458,11 @@ def delete_expense():
     budget_id = request.args.get('budget_id')
 
     if expense_id:
-        print(expense_id)
         budget_model.remove_expense(budget_id, expense_id)
         expense_model.delete_expense(expense_id)
 
-    return jsonify({ 'message':'deleted'})
+    return jsonify({'message': 'deleted'})
+
 
 @app.route("/delete_activity", methods=['GET'])
 def delete_activity():
@@ -450,7 +473,7 @@ def delete_activity():
 
     activity_model.delete_activity(act_id)
 
-    return jsonify({ 'message':'deleted'})
+    return jsonify({'message': 'deleted'})
 
 
 @app.route('/event-details', methods=['GET', 'POST'])
@@ -468,8 +491,8 @@ def event_details():
         for event_id in event_ids_list:
             events.append(event_model.get_event(event_id))
 
+        return render_template('event-details.html', events=events, day=start_day, month=start_month, year=start_year)
 
-        return render_template('event-details.html', events = events, day=start_day, month=start_month, year=start_year)
 
 if __name__ == '__main__':
     app.run(debug=True)

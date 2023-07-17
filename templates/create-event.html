@@ -84,11 +84,11 @@
 
 
     <div id="schedule_fields" style="display:none;">
+      <div id="time-error" class="error"></div>
       <ul id="attivita">
-        <div id="time-error" class="error"></div>
         <li>
-          <label htmlFor="nome1">1) Nome:</label>
-          <input type="text" id="nome1" name="nome1">
+          <label htmlFor="actname1">1) Nome:</label>
+          <input type="text" id="actname1" name="actname1">
           <div class="orario">
             <label htmlFor="orario_inizio1">Orario inizio:</label>
             <input type="text" id="orario_inizio1" name="orario_inizio1", pattern= '^([01]?[0-9]|2[0-3]):[0-5][0-9]$', title='Inserisci un orario nel formato HH:mm'>
@@ -180,22 +180,22 @@
 
     function resetScheduleFields() {
       $('#attivita').empty();
-      $('#nome1').val('');
+      $('#actname1').val('');
       $('#orario_inizio1').val('');
       $('#orario_fine1').val('');
 
       var li = $('<li>');
 
       var nomeLabel = $('<label>', {
-        'for': 'nome1',
+        'for': 'actname1',
         'text': '1) Nome:'
       });
       li.append(nomeLabel);
 
       var nomeInput = $('<input>', {
         'type': 'text',
-        'id': 'nome1',
-        'name': 'nome1'
+        'id': 'actname1',
+        'name': 'actname1'
       });
       li.append(nomeInput);
 
@@ -308,6 +308,7 @@
       });
 
       $('#totale_spesa_text').text('€ ' + totalExpense.toFixed(2));
+      $('#totale_spesa').val(totalExpense);
     }
 
 
@@ -318,15 +319,15 @@
       var li = $('<li>');
 
       var nomeLabel = $('<label>', {
-        'for': 'nome' + attivitaIndex,
+        'for': 'actname' + attivitaIndex,
         'text': attivitaIndex + ') Nome:'
       });
       li.append(nomeLabel);
 
       var nomeInput = $('<input>', {
         'type': 'text',
-        'id': 'nome' + attivitaIndex,
-        'name': 'nome' + attivitaIndex
+        'id': 'actname' + attivitaIndex,
+        'name': 'actname' + attivitaIndex
       });
       li.append(nomeInput);
 

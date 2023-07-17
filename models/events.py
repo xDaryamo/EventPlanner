@@ -1,6 +1,9 @@
 from bson import ObjectId
 from pymongo import MongoClient
 
+from models import schedule
+
+
 class Event:
     def __init__(self):
         self.db = MongoClient()['event_planner']
@@ -47,17 +50,21 @@ class Event:
         # Unione senza ripetizioni tra i due insiemi
         events_union = events_start_list + [event for event in events_end_list if event not in events_start_list]
 
-
         return events_union
+
+    def remove_budget_from_event(self, budget_id):
+        result = self.events_collection.update_one({'budgetId': budget_id}, {'$set': {'budgetId': None}})
+        return result.modified_count > 0
+
+
+    def remove_schedule_from_event(self, schedule_id):
+        result = self.events_collection.update_one({'scheduleId': schedule_id}, {'$set': {'scheduleId': None}})
+        return result.modified_count > 0
+
     def update_event(self, event_id, updated_data):
         result = self.events_collection.update_one({'_id': event_id}, {'$set': updated_data})
         return result.modified_count > 0
 
     def delete_event(self, event_id):
         result = self.events_collection.delete_one({'_id': event_id})
-        return result.deleted_count > 0 
-
-        
-
-
-
+        return result.deleted_count > 0
