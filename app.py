@@ -497,13 +497,32 @@ def event_details():
 @app.route('/events-by-tags', methods=['GET', 'POST'])
 def events_by_tag():
 
-    if request.method == 'GET':
+    if request.method == 'POST':
         user = session.get('user')
-        tags = request.args.get('tags')
-        events = event_model.get_all_events_by_tags(tags, user)
+        tags = request.form['search']
+        tags_list = [tag.strip() for tag in tags.split(',')]
+        events = event_model.get_all_events_by_tags(tags_list, user)
 
         return render_template('event-details.html', events=events)
 
+
+@app.route('/events-by-name', methods=['GET', 'POST'])
+def events_by_name():
+    if request.method == 'POST':
+        user = session.get('user')
+        nome = request.form['search']
+        events = event_model.get_events_by_name(nome, user)
+
+        return render_template('event-details.html', events=events)
+
+@app.route('/events-by-category', methods=['GET', 'POST'])
+def events_by_category():
+    if request.method == 'POST':
+        user = session.get('user')
+        cat = request.form['search']
+        events = event_model.get_events_by_category(cat, user)
+
+        return render_template('event-details.html', events=events)
 
 if __name__ == '__main__':
     app.run(debug=True)

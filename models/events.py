@@ -72,3 +72,13 @@ class Event:
     def get_all_events_by_tags(self, tags, user_id):
         events = self.events_collection.find({'userId': user_id}, {'tags': tags})
         return events
+
+    def get_events_by_name(self, name, user_id):
+        events = self.events_collection.find({'userId': user_id}, {'nome': name})
+        return events
+
+    def get_events_by_category(self, category, user_id):
+        events = self.events_collection.find({'userId': user_id}, {'categoria': category})
+        return events
+
+
