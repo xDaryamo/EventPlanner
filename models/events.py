@@ -68,3 +68,7 @@ class Event:
     def delete_event(self, event_id):
         result = self.events_collection.delete_one({'_id': event_id})
         return result.deleted_count > 0
+
+    def get_all_events_by_tags(self, tags, user_id):
+        events = self.events_collection.find({'userId': user_id}, {'tags': tags})
+        return events

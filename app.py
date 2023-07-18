@@ -494,5 +494,16 @@ def event_details():
         return render_template('event-details.html', events=events, day=start_day, month=start_month, year=start_year)
 
 
+@app.route('/events-by-tags', methods=['GET', 'POST'])
+def events_by_tag():
+
+    if request.method == 'GET':
+        user = session.get('user')
+        tags = request.args.get('tags')
+        events = event_model.get_all_events_by_tags(tags, user)
+
+        return render_template('event-details.html', events=events)
+
+
 if __name__ == '__main__':
     app.run(debug=True)
