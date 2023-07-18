@@ -1,3 +1,6 @@
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+
 <header class="sticky-header">
   <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container">
@@ -16,6 +19,27 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+        <form id="search-form" class="search-form" method="post">
+          <input type="text" name="search" placeholder="Cerca...">
+          <button type="submit"><i class="fas fa-search"></i></button>
+        </form>
+        <div class="tri-state-toggle">
+          <button class="tri-state-toggle-button active" id="toggle-button1">
+              <i class="fas fa-font"></i>
+
+          </button>
+
+          <button class="tri-state-toggle-button" id="toggle-button2">
+              <i class="fas fa-tags"></i>
+          </button>
+
+          <button class="tri-state-toggle-button" id="toggle-button3">
+            <i class="fas fa-sitemap"></i>
+          </button>
+
+        </div>
+
+
         <ul class="navbar-nav">
           {% if 'user' in session %}
             <li class="nav-item">
@@ -39,3 +63,54 @@
     </div>
   </nav>
 </header>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+  var toggleButtons = $(".tri-state-toggle-button");
+  var activeButton = $(".tri-state-toggle-button.active");
+  var slider = $(".tri-state-toggle-slider");
+  var form = $("#search-form");
+  var searchInput = $("input[name='search']");
+  var submitButton = form.find("button[type='submit']");
+
+  function moveSlider() {
+    var left = activeButton.position().left;
+    slider.css({ left: left });
+  }
+
+  moveSlider();
+
+  toggleButtons.click(function() {
+    toggleButtons.removeClass("active");
+    $(this).addClass("active");
+    activeButton = $(this);
+    moveSlider();
+  });
+
+form.submit(function(event) {
+  event.preventDefault(); // Impedisce l'invio del form predefinito
+
+  var searchType = $(".tri-state-toggle-button.active").attr("id");
+  var searchValue = searchInput.val();
+
+  // Disabilita il pulsante di invio se la barra di ricerca è vuota
+  if (searchValue.trim() === "") {
+    return;
+  }
+
+  // Modifica la destinazione del form in base allo stato del bottone selezionato
+  if (searchType === "toggle-button1") {
+    form.attr("action", "/events-by-name");
+  } else if (searchType === "toggle-button2") {
+    form.attr("action", "/events-by-tags");
+  } else if (searchType === "toggle-button3") {
+    form.attr("action", "/events-by-category");
+  }
+
+  // Invia il form
+  this.submit();
+});
+});
+</script>
