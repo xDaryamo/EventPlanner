@@ -1,116 +1,183 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/static/details_style.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<header class="sticky-header">
-  <nav class="navbar navbar-expand-lg navbar-dark">
-    <div class="container">
-      {% if 'user' in session %}
-      <a class="navbar-brand mr-auto" href="/">
-        <img src="/static/images/logo.png" alt="Logo" width="40" height="40" class="mr-2">
-        EventPlanner
-      </a>
-      {% else %}
-      <a class="navbar-brand mr-auto" href="#">
-        <img src="/static/images/logo.png" alt="Logo" width="40" height="40" class="mr-2">
-        EventPlanner
-      </a>
-      {% endif %}
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-        <form id="search-form" class="search-form" method="post">
-          <input type="text" name="search" placeholder="Cerca...">
-          <button type="submit"><i class="fas fa-search"></i></button>
-        </form>
-        <div class="tri-state-toggle">
-          <button class="tri-state-toggle-button active" id="toggle-button1">
-              <i class="fas fa-font"></i>
-
-          </button>
-
-          <button class="tri-state-toggle-button" id="toggle-button2">
-              <i class="fas fa-tags"></i>
-          </button>
-
-          <button class="tri-state-toggle-button" id="toggle-button3">
-            <i class="fas fa-sitemap"></i>
-          </button>
-
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <!-- Modal di errore -->
+    <div class="modal fade" id="error-modal" tabindex="-1" role="dialog" aria-labelledby="error-modal-label" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="error-modal-label">Errore</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Chiudi">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p id="error-message"></p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Chiudi</button>
+          </div>
         </div>
-
-
-        <ul class="navbar-nav">
-          {% if 'user' in session %}
-            <li class="nav-item">
-              <a class="nav-link" href="/">Eventi</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/logout">Logout</a>
-            </li>
-
-          {% else %}
-            <li class="nav-item">
-              <a class="nav-link" href="/login">Login</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/register">Registrazione</a>
-            </li>
-          {% endif %}
-
-        </ul>
       </div>
     </div>
-  </nav>
+<header class="sticky-header">
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            {% if 'user' in session %}
+            <a class="navbar-brand mr-auto" href="/">
+                <img src="/static/images/logo.png" alt="Logo" width="40" height="40" class="mr-2">
+                EventPlanner
+            </a>
+            {% else %}
+            <a class="navbar-brand mr-auto" href="#">
+                <img src="/static/images/logo.png" alt="Logo" width="40" height="40" class="mr-2">
+                EventPlanner
+            </a>
+            {% endif %}
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                {% if 'user' in session %}
+
+                <div class="search-container">
+                    <form id="search-form" class="search-form" method="post">
+                        <input type="text" name="search" placeholder="Cerca per nome..." id="search-input">
+                        <button type="submit"><i class="fas fa-search"></i></button>
+                    </form>
+                    <div class="tri-state-toggle">
+                        <button class="tri-state-toggle-button active" id="toggle-button1" title="Ricerca per nome">
+                            <i class="fas fa-font"></i>
+
+                        </button>
+
+                        <button class="tri-state-toggle-button" id="toggle-button2" title="Ricerca per tag">
+                            <i class="fas fa-tags"></i>
+                        </button>
+
+                        <button class="tri-state-toggle-button" id="toggle-button3" title="Ricerca per categoria">
+                            <i class="fas fa-sitemap"></i>
+                        </button>
+                    </div>
+                </div>
+
+
+                {% endif %}
+
+
+                <ul class="navbar-nav">
+                    {% if 'user' in session %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Eventi</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">Logout</a>
+                    </li>
+
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/register">Registrazione</a>
+                    </li>
+                    {% endif %}
+
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+
 </header>
 
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-$(document).ready(function() {
-  var toggleButtons = $(".tri-state-toggle-button");
-  var activeButton = $(".tri-state-toggle-button.active");
-  var slider = $(".tri-state-toggle-slider");
-  var form = $("#search-form");
-  var searchInput = $("input[name='search']");
-  var submitButton = form.find("button[type='submit']");
+    $(document).ready(function() {
+        var toggleButtons = $(".tri-state-toggle-button");
+        var activeButton = $(".tri-state-toggle-button.active");
+        var slider = $(".tri-state-toggle-slider");
+        var form = $("#search-form");
+        var searchInput = $("input[name='search']");
+        var submitButton = form.find("button[type='submit']");
 
-  function moveSlider() {
-    var left = activeButton.position().left;
-    slider.css({ left: left });
-  }
+        function moveSlider() {
+            var left = activeButton.position().left;
+            slider.css({ left: left });
+        }
 
-  moveSlider();
+        moveSlider();
 
-  toggleButtons.click(function() {
-    toggleButtons.removeClass("active");
-    $(this).addClass("active");
-    activeButton = $(this);
-    moveSlider();
-  });
+        toggleButtons.click(function() {
+            toggleButtons.removeClass("active");
+            $(this).addClass("active");
+            activeButton = $(this);
+            moveSlider();
+        });
 
-form.submit(function(event) {
-  event.preventDefault(); // Impedisce l'invio del form predefinito
+        form.submit(function(event) {
+            event.preventDefault(); // Impedisce l'invio del form predefinito
 
-  var searchType = $(".tri-state-toggle-button.active").attr("id");
-  var searchValue = searchInput.val();
+            var searchType = $(".tri-state-toggle-button.active").attr("id");
+            var searchValue = searchInput.val();
 
-  // Disabilita il pulsante di invio se la barra di ricerca è vuota
-  if (searchValue.trim() === "") {
-    return;
-  }
+            // Disabilita il pulsante di invio se la barra di ricerca è vuota
+            if (searchValue.trim() === "") {
+                return;
+            }
 
-  // Modifica la destinazione del form in base allo stato del bottone selezionato
-  if (searchType === "toggle-button1") {
-    form.attr("action", "/events-by-name");
-  } else if (searchType === "toggle-button2") {
-    form.attr("action", "/events-by-tags");
-  } else if (searchType === "toggle-button3") {
-    form.attr("action", "/events-by-category");
-  }
+            // Modifica la destinazione del form in base allo stato del bottone selezionato
+            if (searchType === "toggle-button1") {
+                form.attr("action", "/events-by-name");
+            } else if (searchType === "toggle-button2") {
+                form.attr("action", "/events-by-tags");
+                var tagsInput = searchValue.trim();
+                var regex = /^[a-zA-Z0-9]+(( )*,( )*[a-zA-Z0-9]+)*$/;
 
-  // Invia il form
-  this.submit();
-});
-});
+                // Verifica se l'input dei tag corrisponde al formato corretto utilizzando una regex
+                if (!regex.test(tagsInput)) {
+                    // Aggiungi il messaggio di errore al modal
+                    $('#error-message').text('Inserisci i tag separati da virgola (caratteri alfanumerici).');
+
+                    // Apri il modal
+                    $('#error-modal').modal('show');
+                    return false;
+                }
+            } else if (searchType === "toggle-button3") {
+                form.attr("action", "/events-by-category");
+            }
+
+
+
+            // Invia il form
+            this.submit();
+        });
+        var header = $(".navbar");
+
+        $(".navbar-toggler").click(function() {
+            header.toggleClass("menu-open");
+        });
+
+        $('.tri-state-toggle-button').click(function() {
+            var selectedToggleId = $(this).attr('id');
+            var placeholderText = 'Cerca...';
+
+            if (selectedToggleId === 'toggle-button1') {
+              placeholderText = 'Cerca per nome...';
+            } else if (selectedToggleId === 'toggle-button2') {
+              placeholderText = 'Cerca per tag...';
+            } else if (selectedToggleId === 'toggle-button3') {
+              placeholderText = 'Cerca per categoria...';
+            }
+
+            $('#search-input').attr('placeholder', placeholderText);
+        });
+
+
+    });
 </script>

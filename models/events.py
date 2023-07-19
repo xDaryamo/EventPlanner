@@ -1,5 +1,6 @@
 from bson import ObjectId
 from pymongo import MongoClient
+import re
 
 from models import schedule
 
@@ -70,15 +71,24 @@ class Event:
         return result.deleted_count > 0
 
     def get_all_events_by_tags(self, tags, user_id):
-        events = self.events_collection.find({'userId': user_id}, {'tags': tags})
+        regex_tags = [re.compile(tag, re.IGNORECASE) for tag in tags]
+        events = self.events_collection.find({
+            'userId': user_id,
+            'tags': {'$in': regex_tags}
+        })
         return events
 
     def get_events_by_name(self, name, user_id):
-        events = self.events_collection.find({'userId': user_id}, {'nome': name})
+        regex_name = re.compile(name, re.IGNORECASE)
+        events = self.events_collection.find({
+            'userId': user_id,
+            'nome': {'$regex': regex_name}
+        })
         return events
 
     def get_events_by_category(self, category, user_id):
-        events = self.events_collection.find({'userId': user_id}, {'categoria': category})
+        categoria_regex = re.compile(category, re.IGNORECASE)
+        events = self.events_collection.find({"userId": user_id, "categoria": {'$regex': categoria_regex}})
         return events
 
 

@@ -445,26 +445,27 @@
        $('#time-error').text('');
 
     });
+    {% if anno and mese and giorno %}
+        var year = {{ anno }};
+        var month = {{ mese }};
+        var day = {{ giorno }};
 
-    var year = {{ anno }};
-    var month = {{ mese }};
-    var day = {{ giorno }};
+        // Aggiungi zeri iniziali se necessario
+        if (month < 10) {
+          month = '0' + month;
+        }
+        if (day < 10) {
+          day = '0' + day;
+        }
 
-    // Aggiungi zeri iniziali se necessario
-    if (month < 10) {
-      month = '0' + month;
-    }
-    if (day < 10) {
-      day = '0' + day;
-    }
+        // Formatta la data nel formato "YYYY-MM-DD"
+        var formattedDate = year+ '-' + month + '-' + day;
 
-    // Formatta la data nel formato "YYYY-MM-DD"
-    var formattedDate = year+ '-' + month + '-' + day;
+        // Imposta la data di inizio predefinita
+        $('#data_inizio').val(formattedDate);
 
-    // Imposta la data di inizio predefinita
-    $('#data_inizio').val(formattedDate);
-
-    // Disabilita il campo di input per la data di inizio
-    $('#data_inizio').prop('readonly', true);
+        // Disabilita il campo di input per la data di inizio
+        $('#data_inizio').prop('readonly', true);
+      {% endif %}
   });
 </script>

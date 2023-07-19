@@ -1,6 +1,12 @@
   <head>
     <meta charset="utf-8">
-    <title>Eventi in data {{ day }}/{{ month }}/{{ year}}</title>
+    {% if type == 'category' %}
+        <title>Eventi per categoria</title>
+    {% elif type == 'tag' %}
+        <title>Eventi per tag</title>
+    {% elif type == 'name' %}
+        <title>Eventi per nome</title>
+    {% endif %}
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Google Font Link for Icons -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
@@ -17,7 +23,13 @@
   <body>
     {% include './fragments/header.html' %}
 
-    <h1>Dettagli Evento</h1>
+    {% if type == 'category' %}
+        <h1>Eventi per categoria</h1>
+    {% elif type == 'tag' %}
+        <h1>Eventi per tag</h1>
+    {% elif type == 'name' %}
+        <h1>Eventi per nome</h1>
+    {% endif %}
 
     <div class="event-cards">
       {% for event in events %}

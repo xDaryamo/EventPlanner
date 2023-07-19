@@ -503,7 +503,7 @@ def events_by_tag():
         tags_list = [tag.strip() for tag in tags.split(',')]
         events = event_model.get_all_events_by_tags(tags_list, user)
 
-        return render_template('event-details.html', events=events)
+        return render_template('search.html', events=list(events), type='tag')
 
 
 @app.route('/events-by-name', methods=['GET', 'POST'])
@@ -513,7 +513,7 @@ def events_by_name():
         nome = request.form['search']
         events = event_model.get_events_by_name(nome, user)
 
-        return render_template('event-details.html', events=events)
+        return render_template('search.html', events=list(events), type='name')
 
 @app.route('/events-by-category', methods=['GET', 'POST'])
 def events_by_category():
@@ -521,8 +521,7 @@ def events_by_category():
         user = session.get('user')
         cat = request.form['search']
         events = event_model.get_events_by_category(cat, user)
-
-        return render_template('event-details.html', events=events)
+        return render_template('search.html', events=list(events), type='category')
 
 if __name__ == '__main__':
     app.run(debug=True)
