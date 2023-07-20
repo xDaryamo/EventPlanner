@@ -1,4 +1,4 @@
-form {
+form:not(.search-form) {
   padding: 20px 80px;
   border-radius: 5px;
   margin-top: 30px;
@@ -29,7 +29,7 @@ li {
   margin-bottom: 10px;
 }
 
-button {
+button:not(.tri-state-toggle-button) {
   background-color: #333;
   color: #fff;
   border: none;
@@ -38,7 +38,7 @@ button {
   cursor: pointer;
 }
 
-button:hover {
+button:not(.tri-state-toggle-button):hover {
   background-color: #555;
 }
 
@@ -50,7 +50,7 @@ button:hover {
   background-color: #ff6666;
 }
 
-input[type="text"],
+input[type="text"]:not(#search-input),
 input[type="date"],
 textarea,
 select{
