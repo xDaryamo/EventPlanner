@@ -44,3 +44,10 @@ class User:
     def delete_user(self, user_id):
         result = self.users_collection.delete_one({'_id': user_id})
         return result.deleted_count > 0
+
+    def get_user_by_username(self, username):
+        user = self.users_collection.find_one({'username': username})
+        if user:
+            user['_id'] = str(user['_id'])
+        return user
+

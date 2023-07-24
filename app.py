@@ -97,6 +97,12 @@ def register():
             error = 'Esiste già un utente con questa email. Riprova con un altro indirizzo email.'
             return render_template('register.html', error=error)
 
+        existing_user = user.get_user_by_username(username)
+        if existing_user:
+            error = 'Esiste già un utente con questo username. Riprova con un altro username.'
+            return render_template('register.html', error=error)
+
+
         # Genera la password hashata
         hashed_password = hashpw(password.encode('utf-8'), gensalt())
 
